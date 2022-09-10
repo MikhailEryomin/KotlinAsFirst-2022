@@ -42,8 +42,9 @@ fun daysInMonth(month: Int, year: Int): Int {
     val feb = if ((year % 4 == 0 && year % 100 != 0) || (year % 100 == 0 && year % 400 == 0)) 29 else 28
     return when {
         month == 2 -> feb
-        month == 8 || month == 12 -> 31
-        month % 2 != 0 -> 31
+        month == 8 || month == 10 || month == 12 -> 31
+        month % 2 != 0 && month < 8 -> 31
+        month % 2 != 0 && month >= 8 -> 30
         else -> 30
     }
 }
@@ -70,5 +71,5 @@ fun circleInside(
  * Вернуть true, если кирпич пройдёт
  */
 fun brickPasses(a: Int, b: Int, c: Int, r: Int, s: Int): Boolean =
-    ((a * b <= r * s) || (a * c <= r * s) || (b * c <= r * s))
+    (a <= s && b <= r || b <= s && c <= r || a <= s && c <= r)
 

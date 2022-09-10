@@ -3,10 +3,7 @@
 package lesson3.task1
 
 import lesson1.task1.sqr
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.pow
-import kotlin.math.sqrt
+import kotlin.math.*
 
 // Урок 3: циклы
 // Максимальное количество баллов = 9
@@ -80,7 +77,7 @@ fun digitNumber(n: Int): Int {
     var count = 0
     var number = n
     if (number != 0) {
-        while (number > 0) {
+        while (abs(number) > 0) {
             count += 1
             number /= 10
         }
@@ -95,9 +92,19 @@ fun digitNumber(n: Int): Int {
  * Ряд Фибоначчи определён следующим образом: fib(1) = 1, fib(2) = 1, fib(n+2) = fib(n) + fib(n+1)
  */
 fun fib(n: Int): Int {
-    if (n == 1) return 1
-    if (n == 2) return 1
-    return fib(n - 2) + fib(n - 1)
+//    if (n == 1) return 1
+//    if (n == 2) return 1
+//    return fib(n - 2) + fib(n - 1)
+    var n0 = 0
+    var n1 = 1
+    var i = 2
+    while (i <= n) {
+        val n2 = n0 + n1
+        n0 = n1
+        n1 = n2
+        i++
+    }
+    return n1
 }
 
 /**
@@ -106,13 +113,13 @@ fun fib(n: Int): Int {
  * Для заданного числа n > 1 найти минимальный делитель, превышающий 1
  */
 fun minDivisor(n: Int): Int {
-    var minDel = Int.MAX_VALUE
-    for (d in 2..n) {
-        if (n % d == 0 && d < minDel) {
-            minDel = d
+    val minDel = Int.MAX_VALUE
+    for (d in 2..round(sqrt(n.toDouble())).toInt() + 1) {
+        if (n % d == 0) {
+            return minOf(minDel, d)
         }
     }
-    return minDel
+    return n
 }
 
 /**
@@ -122,7 +129,7 @@ fun minDivisor(n: Int): Int {
  */
 fun maxDivisor(n: Int): Int {
     var maxDel = 1
-    for (d in 2..sqrt(n.toDouble()).toInt() + 1) {
+    for (d in 2..sqrt(n.toDouble()).toInt()) {
         if (n % d == 0) maxDel = maxOf(maxDel, d, n / d)
     }
     return maxDel
@@ -263,12 +270,13 @@ fun hasDifferentDigits(n: Int): Boolean {
  */
 fun sin(x: Double, eps: Double): Double {
     var result = 0.0
+    val x1 = x % (2 * PI)
     var part: Double
     for (n in 1..40 step 4) {
-        part = x.pow(n) / factorial(n)
+        part = x1.pow(n) / factorial(n)
         result += part
         if (abs(part) < eps) return result
-        part = x.pow(n + 2) / factorial(n + 2)
+        part = x1.pow(n + 2) / factorial(n + 2)
         result -= part
         if (abs(part) < eps) return result
     }
