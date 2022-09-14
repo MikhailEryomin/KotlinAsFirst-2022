@@ -214,11 +214,13 @@ fun factorize(n: Int): List<Int> {
     var n1 = n
     for (i in 2..sqrt(n.toDouble()).toInt() + 1) {
         while (n1 % i == 0) {
-            n1 /= i
-            result.add(i)
+            if (n1 % i == 0) {
+                n1 /= i
+                result.add(i)
+            }
         }
     }
-    if (n1 == n) result.add(n)
+    if (n1 != 1) result.add(n1)
     return result.sorted()
 }
 
@@ -244,6 +246,7 @@ fun factorizeToString(n: Int): String {
 fun convert(n: Int, base: Int): List<Int> {
     val result = mutableListOf<Int>()
     var n1 = n
+    if (n == 0) return listOf(0)
     while (n1 > 0) {
         result.add(n1 % base)
         n1 /= base
