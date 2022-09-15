@@ -161,17 +161,18 @@ fun rookOrBishopThreatens(
  */
 fun triangleKind(a: Double, b: Double, c: Double): Int {
     val trgExist = (a + b > c) && (a + c > b) && (b + c > a)
-    val obtuseCheck = sqr(maxOf(a, b, c)) > sqr(a + b + c - maxOf(a, b, c) - minOf(a, b, c)) + sqr(minOf(a, b, c))
-    val pifCheck = sqr(maxOf(a, b, c)) == sqr(a + b + c - maxOf(a, b, c) - minOf(a, b, c)) + sqr(minOf(a, b, c))
+    val maxSide = maxOf(a,b,c)
+    val averageSide = a + b + c - maxOf(a, b, c) - minOf(a, b, c)
+    val minSide = minOf(a,b,c)
+    val obtuseCheck = sqr(maxSide) > sqr(averageSide) + sqr(minSide)
+    val pifCheck = sqr(maxSide) == sqr(averageSide) + sqr(minSide)
     return if (trgExist) {
         when {
             obtuseCheck -> 2
             pifCheck -> 1
             else -> 0
         }
-    } else {
-        -1
-    }
+    } else -1
 }
 
 /**
@@ -182,12 +183,11 @@ fun triangleKind(a: Double, b: Double, c: Double): Int {
  * Найти длину пересечения отрезков AB и CD.
  * Если пересечения нет, вернуть -1.
  */
-fun segmentLength(a: Int, b: Int, c: Int, d: Int): Int {
-    return when {
+fun segmentLength(a: Int, b: Int, c: Int, d: Int): Int =
+    when {
         a >= c && b <= d -> b - a
         c >= a && d <= b -> d - c
         b in c..d -> b - c
         d in a..b -> d - a
         else -> -1
     }
-}

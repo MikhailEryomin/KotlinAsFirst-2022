@@ -168,16 +168,20 @@ fun collatzSteps(x: Int): Int {
  * Для заданных чисел m и n найти наименьшее общее кратное, то есть,
  * минимальное число k, которое делится и на m и на n без остатка
  */
-fun lcm(m: Int, n: Int): Int {
-    var m1 = m
-    var n1 = n
-    //НОД
+fun nod (a: Int, b: Int): Int {
+    var m1 = a
+    var n1 = b
     while (m1 != n1) {
         if (m1 > n1) m1 -= n1
         else n1 -= m1
     }
+    return m1
+}
+fun lcm(m: Int, n: Int): Int {
+    //НОД
+    val nod_= nod(m, n)
     //НОК
-    return n * m / m1
+    return n * m / nod_
 }
 
 /**
@@ -187,18 +191,11 @@ fun lcm(m: Int, n: Int): Int {
  * Взаимно простые числа не имеют общих делителей, кроме 1.
  * Например, 25 и 49 взаимно простые, а 6 и 8 -- нет.
  */
-fun isCoPrime(m: Int, n: Int): Boolean {
-    var m1 = m
-    var n1 = n
-    while (m1 != n1) {
-        if (m1 > n1) m1 -= n1
-        else n1 -= m1
-    }
-    return when (m1) {
+fun isCoPrime(m: Int, n: Int): Boolean =
+    when (nod(m, n)) {
         1 -> true
         else -> false
     }
-}
 
 /**
  * Средняя (3 балла)
@@ -226,19 +223,11 @@ fun revert(n: Int): Int {
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun isPalindrome(n: Int): Boolean {
-    var newNum = 0
-    var num = n
-    //Формирование нового числа
-    while (num > 0) {
-        newNum = newNum * 10 + num % 10
-        num /= 10
-    }
-    return when (newNum) {
+fun isPalindrome(n: Int): Boolean =
+    when (revert(n)) {
         n -> true
         else -> false
     }
-}
 
 /**
  * Средняя (3 балла)
