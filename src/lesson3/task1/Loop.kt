@@ -261,13 +261,12 @@ fun sin(x: Double, eps: Double): Double {
     var result = 0.0
     val x1 = x % (2 * PI)
     var part: Double
-    for (n in 1..40 step 4) {
+    var sign = 1
+    for (n in 1..100 step 2) {
         part = x1.pow(n) / factorial(n)
-        result += part
+        result += sign * part
         if (abs(part) < eps) return result
-        part = x1.pow(n + 2) / factorial(n + 2)
-        result -= part
-        if (abs(part) < eps) return result
+        sign *= -1
     }
     return 0.0
 }
@@ -285,13 +284,12 @@ fun cos(x: Double, eps: Double): Double {
     var result = 1.0
     var part: Double
     val x1 = x % (2 * PI)
-    for (n in 2..100 step 4) {
+    var sign = -1
+    for (n in 2..100 step 2) {
         part = x1.pow(n) / factorial(n)
-        result -= part
+        result += sign * part
         if (abs(part) < eps) return result
-        part = x1.pow(n + 2) / factorial(n + 2)
-        result += part
-        if (abs(part) < eps) return result
+        sign *= -1
     }
     return 0.0
 }
