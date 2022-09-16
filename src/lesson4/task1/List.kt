@@ -143,11 +143,9 @@ fun mean(list: List<Double>): Double = if (list.isNotEmpty()) list.sum() / list.
  * Обратите внимание, что данная функция должна изменять содержание списка list, а не его копии.
  */
 fun center(list: MutableList<Double>): MutableList<Double> {
-    val averageOfList = list.sum() / list.size
-    if (list.isNotEmpty()) {
-        for (i in 0 until list.size) {
-            list[i] -= averageOfList
-        }
+    val averageOfList = mean(list)
+    for (i in 0 until list.size) {
+        list[i] -= averageOfList
     }
     return list
 }
@@ -214,10 +212,8 @@ fun factorize(n: Int): List<Int> {
     var n1 = n
     for (i in 2..sqrt(n.toDouble()).toInt() + 1) {
         while (n1 % i == 0) {
-            if (n1 % i == 0) {
-                n1 /= i
-                result.add(i)
-            }
+            n1 /= i
+            result.add(i)
         }
     }
     if (n1 != 1) result.add(n1)
@@ -231,10 +227,7 @@ fun factorize(n: Int): List<Int> {
  * Результат разложения вернуть в виде строки, например 75 -> 3*5*5
  * Множители в результирующей строке должны располагаться по возрастанию.
  */
-fun factorizeToString(n: Int): String {
-    val divs = factorize(n)
-    return if (divs.size > 1) divs.joinToString(separator = "*") else divs.joinToString()
-}
+fun factorizeToString(n: Int): String = factorize(n).joinToString(separator = "*")
 
 /**
  * Средняя (3 балла)
@@ -267,16 +260,18 @@ fun convert(n: Int, base: Int): List<Int> {
  */
 fun convertToString(n: Int, base: Int): String {
     val converted = convert(n, base)
-    var result = ""
+    val result: StringBuilder = StringBuilder()
     for (element in converted) {
-        result += if (element > 9) {
-            val c = (97 + (element - 10))
-            c.toChar().toString()
-        } else {
-            element.toString()
-        }
+        result.append(
+            if (element > 9) {
+                val c = (97 + (element - 10))
+                c.toChar().toString()
+            } else {
+                element.toString()
+            }
+        )
     }
-    return result
+    return result.toString()
 }
 
 /**

@@ -168,7 +168,7 @@ fun collatzSteps(x: Int): Int {
  * Для заданных чисел m и n найти наименьшее общее кратное, то есть,
  * минимальное число k, которое делится и на m и на n без остатка
  */
-fun nod (a: Int, b: Int): Int {
+fun nod(a: Int, b: Int): Int {
     var m1 = a
     var n1 = b
     while (m1 != n1) {
@@ -177,9 +177,10 @@ fun nod (a: Int, b: Int): Int {
     }
     return m1
 }
+
 fun lcm(m: Int, n: Int): Int {
     //НОД
-    val nod_= nod(m, n)
+    val nod_ = nod(m, n)
     //НОК
     return n * m / nod_
 }
@@ -191,11 +192,7 @@ fun lcm(m: Int, n: Int): Int {
  * Взаимно простые числа не имеют общих делителей, кроме 1.
  * Например, 25 и 49 взаимно простые, а 6 и 8 -- нет.
  */
-fun isCoPrime(m: Int, n: Int): Boolean =
-    when (nod(m, n)) {
-        1 -> true
-        else -> false
-    }
+fun isCoPrime(m: Int, n: Int): Boolean = nod(m, n) == 1
 
 /**
  * Средняя (3 балла)
@@ -262,13 +259,15 @@ fun sin(x: Double, eps: Double): Double {
     val x1 = x % (2 * PI)
     var part: Double
     var sign = 1
-    for (n in 1..100 step 2) {
+    var n = 1
+    while (true) {
         part = x1.pow(n) / factorial(n)
         result += sign * part
-        if (abs(part) < eps) return result
+        if (abs(part) < eps) break
         sign *= -1
+        n += 2
     }
-    return 0.0
+    return result
 }
 
 /**
@@ -285,13 +284,15 @@ fun cos(x: Double, eps: Double): Double {
     var part: Double
     val x1 = x % (2 * PI)
     var sign = -1
-    for (n in 2..100 step 2) {
+    var n = 2
+    while (true) {
         part = x1.pow(n) / factorial(n)
         result += sign * part
-        if (abs(part) < eps) return result
+        if (abs(part) < eps) break
         sign *= -1
+        n += 2
     }
-    return 0.0
+    return result
 }
 
 /**

@@ -96,9 +96,8 @@ fun timeForHalfWay(
     val halfWay = (v1 * t1 + v2 * t2 + v3 * t3) / 2
     return when {
         halfWay < v1 * t1 -> halfWay / v1
-        halfWay < v1 * t1 + v2 * t2 -> t1 + (halfWay - v1 * t1) / v2
-        halfWay < v1 * t1 + v2 * t2 + v3 * t3 -> t1 + t2 + (halfWay - v2 * t2) / v3
-        else -> Double.NaN
+        halfWay < v1 * t1 + v2 * t2 -> t1 + ((halfWay - v1 * t1) / v2)
+        else -> t1 + t2 + ((halfWay - t1 * v1 - v2 * t2) / v3)
     }
 }
 
@@ -161,9 +160,9 @@ fun rookOrBishopThreatens(
  */
 fun triangleKind(a: Double, b: Double, c: Double): Int {
     val trgExist = (a + b > c) && (a + c > b) && (b + c > a)
-    val maxSide = maxOf(a,b,c)
-    val averageSide = a + b + c - maxOf(a, b, c) - minOf(a, b, c)
-    val minSide = minOf(a,b,c)
+    val maxSide = maxOf(a, b, c)
+    val minSide = minOf(a, b, c)
+    val averageSide = a + b + c - maxSide - minSide
     val obtuseCheck = sqr(maxSide) > sqr(averageSide) + sqr(minSide)
     val pifCheck = sqr(maxSide) == sqr(averageSide) + sqr(minSide)
     return if (trgExist) {
