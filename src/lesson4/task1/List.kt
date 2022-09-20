@@ -260,7 +260,7 @@ fun convert(n: Int, base: Int): List<Int> {
  */
 fun convertToString(n: Int, base: Int): String {
     val converted = convert(n, base)
-    val result: StringBuilder = StringBuilder()
+    val result = StringBuilder()
     for (element in converted) {
         result.append(
             if (element > 9) {
@@ -325,17 +325,17 @@ fun decimalFromString(str: String, base: Int): Int {
 fun roman(n: Int): String {
     val romanLiters = listOf("M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I")
     val romanNumbs = listOf(1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1)
-    var result = ""
+    val result = StringBuilder()
     var n1 = n
     while (n1 > 0) {
         for (i in romanNumbs.indices) {
             while (n1 >= romanNumbs[i]) {
                 n1 -= romanNumbs[i]
-                result += romanLiters[i]
+                result.append(romanLiters[i])
             }
         }
     }
-    return result
+    return result.toString()
 
 }
 
