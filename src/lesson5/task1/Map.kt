@@ -3,6 +3,8 @@
 package lesson5.task1
 
 import ru.spbstu.wheels.sorted
+import kotlin.math.cos
+import kotlin.math.max
 
 // Урок 5: ассоциативные массивы и множества
 // Максимальное количество баллов = 14
@@ -371,20 +373,32 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
  *   ) -> emptySet()
  */
 fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> {
-    var list = mutableListOf<Pair<String, Pair<Int, Int>>>()
-    for ((key, value) in treasures) {
-        val itemWeight = value.first
-        if (itemWeight <= capacity) list.add(key to value)
-    }
-    list = list.sortedByDescending { it.second.second }.toMutableList()
-    var total = capacity
-    val taken = mutableSetOf<String>()
-    for ((name, itemData) in list) {
-        val weight = itemData.first
-        if (total - weight >= 0) {
-            taken.add(name)
-            total -= weight
+    val table = Array(treasures.size + 1) { Array(capacity + 1) { (0 to mutableSetOf<String>()) } }
+    val weights = listOf(0) + treasures.values.map { it.first }
+    val costs = listOf(0) + treasures.values.map { it.second }
+    val names = listOf("") + treasures.keys
+    var mx = -1
+    var nameMaxSet = setOf<String>()
+    for (i in 1..treasures.size) {
+        for (j in 0..capacity) {
+            if (weights[i] > j) {
+                table[i][j] = table[i - 1][j]
+            } else {
+                var set = table[i][j].second
+                //set += names[i]
+                val cell1 = table[i - 1][j]
+                val cell2 = table[i - 1][j - weights[i]]
+                if (cell1.first > cell2.first + costs[i]) {
+                    set = cell1.second
+                } else set += cell2.second + names[i]
+
+                table[i][j] = max(cell1.first, cell2.first + costs[i]) to set
+            }
+            if (table[i][j].first > mx) {
+                mx = table[i][j].first
+                nameMaxSet = table[i][j].second
+            }
         }
     }
-    return taken
+    return nameMaxSet
 }
