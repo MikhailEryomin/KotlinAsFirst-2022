@@ -3,7 +3,6 @@
 package lesson5.task1
 
 import ru.spbstu.wheels.sorted
-import kotlin.math.cos
 import kotlin.math.max
 
 // Урок 5: ассоциативные массивы и множества
@@ -139,11 +138,7 @@ fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean = (a.ent
  *     -> a changes to mutableMapOf() aka becomes empty
  */
 fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>) {
-    val keysToRemove = mutableSetOf<String>()
-    for (item in b.entries) if (item in a.entries) {
-        keysToRemove += item.key
-    }
-    a -= keysToRemove
+    for ((key) in b.entries.filter { it in a.entries }) a.remove(key)
 }
 
 
@@ -155,7 +150,7 @@ fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>) {
  * т. е. whoAreInBoth(listOf("Марат", "Семён, "Марат"), listOf("Марат", "Марат")) == listOf("Марат")
  */
 
-fun whoAreInBoth(a: List<String>, b: List<String>): List<String> = a.filter { it in b }.toSet().toList()
+fun whoAreInBoth(a: List<String>, b: List<String>): List<String> = a.intersect(b.toSet()).toList()
 
 /**
  * Средняя (3 балла)
@@ -190,16 +185,12 @@ fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<S
  * Например:
  *   averageStockPrice(listOf("MSFT" to 100.0, "MSFT" to 200.0, "NFLX" to 40.0))
  *     -> mapOf("MSFT" to 150.0, "NFLX" to 40.0)
+ *
+ *   listOf("MSFT" to 100.0, "NFLX" to 40.0) -> mapOf("MSFT" to 100.0, NFLX=40.0)
  */
 fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Double> {
-    val map = mutableMapOf<String, Double>()
-    for ((key, value) in stockPrices) {
-        if (key in map) {
-            val values = listOf(map[key]!!, value)
-            map[key] = values.sum() / values.size
-        } else map[key] = value
-    }
-    return map
+    return stockPrices.groupBy { it.first }.mapValues { it -> it.value.map { it.second } }
+        .mapValues { it.value.sum() / it.value.size }
 }
 
 /**
@@ -217,18 +208,8 @@ fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Doub
  *     "печенье"
  *   ) -> "Мария"
  */
-fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): String? {
-    var result: String? = null
-    var min = Double.MAX_VALUE
-    for ((name, pair) in stuff) {
-        val stuffCost = pair.second
-        if (pair.first == kind && stuffCost < min) {
-            min = stuffCost
-            result = name
-        }
-    }
-    return result
-}
+fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): String? =
+    stuff.filterValues { it.first == kind }.minByOrNull { it.value.second }?.key
 
 /**
  * Средняя (3 балла)
@@ -239,7 +220,8 @@ fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): S
  * Например:
  *   canBuildFrom(listOf('a', 'b', 'o'), "baobab") -> true
  */
-fun canBuildFrom(chars: List<Char>, word: String): Boolean = word.toSet().all { it in chars }
+fun canBuildFrom(chars: List<Char>, word: String): Boolean =
+    word.uppercase().toSet().all { it -> it in chars.map { it.uppercaseChar() } }
 
 /**
  * Средняя (4 балла)
@@ -253,11 +235,8 @@ fun canBuildFrom(chars: List<Char>, word: String): Boolean = word.toSet().all { 
  * Например:
  *   extractRepeats(listOf("a", "b", "a")) -> mapOf("a" to 2)
  */
-fun extractRepeats(list: List<String>): Map<String, Int> {
-    val map = mutableMapOf<String, Int>()
-    for (item in list) map[item] = if (item in map) map[item]!! + 1 else 1
-    return map.filter { it.value != 1 }
-}
+fun extractRepeats(list: List<String>): Map<String, Int> =
+    list.groupBy { it }.filterValues { it.size > 1 }.mapValues { it.value.size }
 
 /**
  * Средняя (3 балла)
@@ -316,14 +295,15 @@ fun hasAnagrams(words: List<String>): Boolean {
  *        )
  */
 fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<String>> {
-    val result = friends.mapValues { (_, it) -> it.toMutableSet() }.toMutableMap()
-    for ((name, set) in friends) {
-        for (item in set) {
-            if (result[item] != null) result[name]!! += result[item]!!.toList()
-                .filter { it != name } else result[item] = mutableSetOf()
-        }
-    }
-    return result
+//    val result = friends.mapValues { (_, it) -> it.toMutableSet() }.toMutableMap()
+//    for ((name, set) in friends) {
+//        for (item in set) {
+//            if (result[item] != null) result[name]!! += result[item]!!.toList()
+//                .filter { it != name } else result[item] = mutableSetOf()
+//        }
+//    }
+//    return result
+    TODO()
 }
 
 /**
@@ -342,11 +322,13 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
  * Например:
  *   findSumOfTwo(listOf(1, 2, 3), 4) -> Pair(0, 2)
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
+ *   findSumOfTwo(listOf(3, 3, 2, 3), 6) -> Pair(0, 1)
  */
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
+    val map = mutableMapOf<Int, Int>()
     for (i in list.indices) {
-        val term = number - list[i]
-        if (term in list && list.indexOf(term) != i) return (i to list.indexOf(term)).sorted()
+        if (number - list[i] in map) return list.indexOf(number - list[i]) to i
+        else map[list[i]] = number - list[i]
     }
     return -1 to -1
 }
@@ -377,15 +359,12 @@ fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<Strin
     val weights = listOf(0) + treasures.values.map { it.first }
     val costs = listOf(0) + treasures.values.map { it.second }
     val names = listOf("") + treasures.keys
-    var mx = -1
-    var nameMaxSet = setOf<String>()
     for (i in 1..treasures.size) {
         for (j in 0..capacity) {
             if (weights[i] > j) {
                 table[i][j] = table[i - 1][j]
             } else {
                 var set = table[i][j].second
-                //set += names[i]
                 val cell1 = table[i - 1][j]
                 val cell2 = table[i - 1][j - weights[i]]
                 if (cell1.first > cell2.first + costs[i]) {
@@ -394,11 +373,7 @@ fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<Strin
 
                 table[i][j] = max(cell1.first, cell2.first + costs[i]) to set
             }
-            if (table[i][j].first > mx) {
-                mx = table[i][j].first
-                nameMaxSet = table[i][j].second
-            }
         }
     }
-    return nameMaxSet
+    return table[treasures.size][capacity].second
 }
