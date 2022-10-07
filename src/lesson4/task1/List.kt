@@ -414,47 +414,12 @@ fun russian(n: Int): String {
         800 to "восемьсот",
         900 to "девятьсот",
     )
-    val mapForThousands = mapOf(
-        1 to "одна",
-        2 to "две",
-        3 to "три",
-        4 to "четыре",
-        5 to "пять",
-        6 to "шесть",
-        7 to "семь",
-        8 to "восемь",
-        9 to "девять",
-        10 to "десять",
-        11 to "одиннадцать",
-        12 to "двенадцать",
-        13 to "тринадцать",
-        14 to "четырнадцать",
-        15 to "пятнадцать",
-        16 to "шестнадцатьб",
-        17 to "семнадцать",
-        18 to "восемнадцать",
-        19 to "девятнадцать",
-        20 to "двадцать",
-        30 to "тридцать",
-        40 to "сорок",
-        50 to "пятьдесят",
-        60 to "шестьдесят",
-        70 to "семьдесят",
-        80 to "восемьдесят",
-        90 to "девяносто",
-        100 to "сто",
-        200 to "двести",
-        300 to "триста",
-        400 to "четыреста",
-        500 to "пятьсот",
-        600 to "шестьсот",
-        700 to "семьсот",
-        800 to "восемьсот",
-        900 to "девятьсот",
-    )
+    val mapForThousands = map.toMutableMap()
+    mapForThousands[1] = "одна"
+    mapForThousands[2] = "две"
+    mapForThousands.toMap()
     return if (n < 1000) convertCount(n, map) else if (n in (1000..9999)) thousandCount(
-        n / 1000,
-        map
+        n / 1000, map
     ) + " " + convertCount(n, map) else
         (thousandCount(n / 1000, mapForThousands) + " " + convertCount(n, map)).trim()
 }
