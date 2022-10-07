@@ -366,11 +366,8 @@ fun convertCount(n: Int, map: Map<Int, String>): String {
 
 fun thousandCount(n: Int, map: Map<Int, String>): String {
     return when {
-        n == 1 -> "одна тысяча"
-        n == 2 -> "две тысячи"
-        n == 3 -> "три тысячи"
-        n == 4 -> "четыре тысячи"
-        n % 10 in (1..4) -> "${convertCount(n, map)} тысячи"
+        n % 10 in (2..4) -> "${convertCount(n, map)} тысячи"
+        n % 10 == 1 -> "${convertCount(n, map)} тысяча"
         else -> "${convertCount(n, map)} тысяч"
     }
 }
@@ -414,13 +411,13 @@ fun russian(n: Int): String {
         800 to "восемьсот",
         900 to "девятьсот",
     )
-    val mapForThousands = map.toMutableMap()
-    mapForThousands[1] = "одна"
-    mapForThousands[2] = "две"
-    mapForThousands.toMap()
+    val map2 = map.toMutableMap()
+    map2[1] = "одна"
+    map2[2] = "две"
+    map2.toMap()
     return if (n < 1000) convertCount(n, map) else if (n in (1000..9999)) thousandCount(
-        n / 1000, map
+        n / 1000, map2
     ) + " " + convertCount(n, map) else
-        (thousandCount(n / 1000, mapForThousands) + " " + convertCount(n, map)).trim()
+        (thousandCount(n / 1000, map2) + " " + convertCount(n, map)).trim()
 }
 
