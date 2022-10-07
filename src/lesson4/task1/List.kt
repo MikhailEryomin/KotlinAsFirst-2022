@@ -365,9 +365,11 @@ fun convertCount(n: Int, map: Map<Int, String>): String {
 }
 
 fun thousandCount(n: Int, map: Map<Int, String>): String {
+    val last = n % 10
+    val preLast = n / 10 % 10
     return when {
-        n % 10 in (2..4) -> "${convertCount(n, map)} тысячи"
-        n % 10 == 1 -> "${convertCount(n, map)} тысяча"
+        last in (2..4) && preLast != 1 -> "${convertCount(n, map)} тысячи"
+        last == 1 && preLast != 1 -> "${convertCount(n, map)} тысяча"
         else -> "${convertCount(n, map)} тысяч"
     }
 }
