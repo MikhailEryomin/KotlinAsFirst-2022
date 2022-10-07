@@ -4,10 +4,7 @@ package lesson4.task1
 
 
 import lesson1.task1.*
-import lesson3.task1.digitNumber
-import ru.spbstu.wheels.defaultCopy
 import kotlin.math.pow
-import kotlin.math.round
 import kotlin.math.sqrt
 
 // Урок 4: списки
@@ -346,56 +343,119 @@ fun roman(n: Int): String {
  * Например, 375 = "триста семьдесят пять",
  * 23964 = "двадцать три тысячи девятьсот шестьдесят четыре"
  */
-fun russian(n: Int): String = TODO()
-//    val fromOneToTen = listOf("один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять")
-//    val fromOneToTenNumbs = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9)
-//    val extra = listOf("одна", "две", "тысяч")
-//    val fromTenToTwelve = listOf(
-//        "десять",
-//        "одиннадцать",
-//        "двенадцать",
-//        "тринадцать",
-//        "четырнадцать",
-//        "пятнадцать",
-//        "шестнадцать",
-//        "семнадцать",
-//        "восемнадцать",
-//        "девятнадцать"
-//    )
-//    val fromTenToTwelveNumbs = listOf(
-//        10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
-//    )
-//    val dozens =
-//        listOf("двадцать", "тридцать", "сорок", "пятьдесят", "шестьдесят", "семьдесят", "восемдесят", "девяносто")
-//    val dozensNumbs = listOf(20, 30, 40, 50, 60, 70, 80, 90)
-//    val hundreds =
-//        listOf("сто", "двести", "триста", "четыреста", "пятьсот", "шестьсот", "семьсот", "восемьсот", "девятьсот")
-//    val hundredsNumbs = listOf(100, 200, 300, 400, 500, 600, 700, 800, 900)
-//    val thousands = "тысяча"
-//    val thousandsNumb = 1000
-//
-//    var result = ""
-//    var n1 = n
-//    val allLetters = (fromOneToTen + fromTenToTwelve + dozens + hundreds + thousands).reversed()
-//    val allNumbs = (fromOneToTenNumbs + fromTenToTwelveNumbs + dozensNumbs + hundredsNumbs + thousandsNumb).reversed()
-//    while (n1 > 0){
-//        for (i in allNumbs.indices){
-//            val s = 0
-//            if (s == 1) result += allLetters[0]
-//        }
-//    }
 
+fun convertCount(n: Int, map: Map<Int, String>): String {
+    var currDigit = 0
+    var number = n
+    val result = mutableListOf<String>()
+    //Если первые два разряда можно представить одним словом, то сразу обрабатываем и перекидываем разряды
+    if (n / 10 % 10 == 1 || (n % 10 == 0 && n / 10 % 10 != 0)) {
+        result.add(map[n / 10 % 10 * 10 + n % 10]!!)
+        number /= 100
+        currDigit += 2
+    }
+    //обрабатываем оставшуюся часть ИЛИ все число если условие выше не сработало
+    while (number > 0 && currDigit < 3) {
+        val digit = number % 10 * 10.0.pow(currDigit).toInt()
+        if (digit != 0) result.add(map[digit]!!)
+        currDigit += 1
+        number /= 10
+    }
+    return result.reversed().joinToString(separator = " ")
+}
 
-//fun getCountOfCount(n1: Int, result: String, allNumbs:List<Int>, allLetters:List<String>): String {
-//    var res = result
-//    var s = 0
-//    var n = n1
-//    while (n1 >= allNumbs[i]){
-//        n -= allNumbs[i]
-//        if (n1 >= 1000){
-//            s += 1
-//        } else {
-//            res += allLetters[i]
-//        }
-//    }
-//}
+fun thousandCount(n: Int, map: Map<Int, String>): String {
+    return when {
+        n == 1 -> "одна тысяча"
+        n == 2 -> "две тысячи"
+        n == 3 -> "три тысячи"
+        n == 4 -> "четыре тысячи"
+        n % 10 in (1..4) -> "${convertCount(n, map)} тысячи"
+        else -> "${convertCount(n, map)} тысяч"
+    }
+}
+
+fun russian(n: Int): String {
+    val map = mapOf(
+        1 to "один",
+        2 to "два",
+        3 to "три",
+        4 to "четыре",
+        5 to "пять",
+        6 to "шесть",
+        7 to "семь",
+        8 to "восемь",
+        9 to "девять",
+        10 to "десять",
+        11 to "одиннадцать",
+        12 to "двенадцать",
+        13 to "тринадцать",
+        14 to "четырнадцать",
+        15 to "пятнадцать",
+        16 to "шестнадцатьб",
+        17 to "семнадцать",
+        18 to "восемнадцать",
+        19 to "девятнадцать",
+        20 to "двадцать",
+        30 to "тридцать",
+        40 to "сорок",
+        50 to "пятьдесят",
+        60 to "шестьдесят",
+        70 to "семьдесят",
+        80 to "восемьдесят",
+        90 to "девяносто",
+        100 to "сто",
+        200 to "двести",
+        300 to "триста",
+        400 to "четыреста",
+        500 to "пятьсот",
+        600 to "шестьсот",
+        700 to "семьсот",
+        800 to "восемьсот",
+        900 to "девятьсот",
+    )
+    val mapForThousands = mapOf(
+        1 to "одна",
+        2 to "две",
+        3 to "три",
+        4 to "четыре",
+        5 to "пять",
+        6 to "шесть",
+        7 to "семь",
+        8 to "восемь",
+        9 to "девять",
+        10 to "десять",
+        11 to "одиннадцать",
+        12 to "двенадцать",
+        13 to "тринадцать",
+        14 to "четырнадцать",
+        15 to "пятнадцать",
+        16 to "шестнадцатьб",
+        17 to "семнадцать",
+        18 to "восемнадцать",
+        19 to "девятнадцать",
+        20 to "двадцать",
+        30 to "тридцать",
+        40 to "сорок",
+        50 to "пятьдесят",
+        60 to "шестьдесят",
+        70 to "семьдесят",
+        80 to "восемьдесят",
+        90 to "девяносто",
+        100 to "сто",
+        200 to "двести",
+        300 to "триста",
+        400 to "четыреста",
+        500 to "пятьсот",
+        600 to "шестьсот",
+        700 to "семьсот",
+        800 to "восемьсот",
+        900 to "девятьсот",
+    )
+    return if (n < 1000) convertCount(n, map) else if (n in (1000..9999)) thousandCount(
+        n / 1000,
+        map
+    ) + " " + convertCount(n, map) else
+        (thousandCount(n / 1000, mapForThousands) + " " + convertCount(n, map)).trim()
+}
+
