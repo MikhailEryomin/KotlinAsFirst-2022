@@ -94,18 +94,17 @@ fun dateStrToDigit(str: String): String {
         "ноября" to 11,
         "декабря" to 12
     )
-    try {
+    return try {
         val date = str.split(" ")
         val days = date[0].toInt()
-        val month = date[1]
+        val month = months[date[1]]
         val year = date[2].toInt()
-        val monthId = months[month]
-        if (monthId != null && daysInMonth(months[month]!!, year) >= days) {
-            return String.format("%02d.%02d.%4d", days, monthId, year)
-        }
-        return ""
+        if (month != null && daysInMonth(month, year) >= days) {
+            String.format("%02d.%02d.%d", days, month, year)
+        } else
+            ""
     } catch (e: Exception) {
-        return ""
+        ""
     }
 }
 
@@ -134,7 +133,7 @@ fun dateDigitToStr(digital: String): String {
         11 to "ноября",
         12 to "декабря"
     )
-    try {
+    return try {
         val date = digital.split(".")
         if (date.size == 3) {
             val days = date[0].toInt()
@@ -142,12 +141,11 @@ fun dateDigitToStr(digital: String): String {
             val year = date[2].toInt()
             val month = months[monthId]
             if (month != null && daysInMonth(monthId, year) >= days) {
-                return "$days $month $year"
-            }
-        }
-        return ""
+                "$days $month $year"
+            } else ""
+        } else ""
     } catch (e: Exception) {
-        return ""
+        ""
     }
 }
 
@@ -190,11 +188,11 @@ fun bestLongJump(jumps: String): Int {
     val str = jumps.split(" ")
     val digits = (0..9).toList().map { it.toString() }
     val whiteList = digits + listOf(" ", "%", "-")
-    val allowed = jumps.all { it.toString() in whiteList }
+    val allowed = str.isNotEmpty() && jumps.all { it.toString() in whiteList }
     var mx = -1
     if (allowed) {
         for (item in str) {
-            if (item.all { it.toString() in digits }) {
+            if (item.all { it.isDigit() }) {
                 mx = maxOf(mx, item.toInt())
             }
         }
@@ -240,15 +238,15 @@ fun bestHighJump(jumps: String): Int {
  * Про нарушении формата входной строки бросить исключение IllegalArgumentException
  */
 fun plusMinus(expression: String): Int {
-    val digits = (0..9).toList().map { it.toString() }
-    val whiteList = digits + listOf("+", "-", " ")
+    val whiteList = (0..9).toList().map { it.toString() } + listOf("+", "-", " ")
     val str = expression.trim().split(" ")
-    val allowed = expression.all { it.toString() in whiteList } && expression[0] !in listOf('+', '-')
+    val allowed =
+        expression.isNotEmpty() && expression.all { it.toString() in whiteList } && expression[0] !in listOf('+', '-')
     var result: Int
     if (allowed) {
         result = str[0].toInt()
         for (i in 1 until str.size step 2) {
-            val nextIsDigit = str[i + 1].all { it.toString() in digits }
+            val nextIsDigit = str[i + 1].all { it.isDigit() }
             if (nextIsDigit) {
                 if (str[i] == "+") {
                     result += str[i + 1].toInt()
@@ -277,7 +275,10 @@ fun firstDuplicateIndex(str: String): Int {
     var n = 0
     var id = -1
     for (i in 0 until words.size - 1) {
-        if (words[i] == words[i + 1]) id = n
+        if (words[i] == words[i + 1]) {
+            id = n
+            break
+        }
         n += words[i].length + 1
     }
     return id
@@ -326,7 +327,7 @@ fun fromRoman(roman: String): Int {
         'M' to 1000
     )
     var result = 0
-    if (roman.all { it in letters.keys }) {
+    if (roman.isNotEmpty() && roman.all { it in letters.keys }) {
         for (i in 0 until roman.length - 1) {
             val curr = roman[i]
             if (letters[curr]!! < letters[roman[i + 1]]!!) result -= letters[curr]!!
