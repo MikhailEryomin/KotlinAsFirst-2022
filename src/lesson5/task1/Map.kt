@@ -2,6 +2,7 @@
 
 package lesson5.task1
 
+import lesson4.task1.mean
 import ru.spbstu.wheels.sorted
 import kotlin.math.max
 
@@ -99,17 +100,9 @@ fun buildWordSet(text: List<String>): MutableSet<String> {
  *   buildGrades(mapOf("Марат" to 3, "Семён" to 5, "Михаил" to 5))
  *     -> mapOf(5 to listOf("Семён", "Михаил"), 3 to listOf("Марат"))
  */
-fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> {
-    val map = mutableMapOf<Int, MutableList<String>>()
-    for ((name, grade) in grades) {
-        if (map[grade] != null) {
-            map[grade]!!.add(name)
-        } else {
-            map[grade] = mutableListOf(name)
-        }
-    }
-    return map
-}
+fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> =
+    grades.map { it.key to it.value }.groupBy({ it.second }, { it.first })
+
 
 /**
  * Простая (2 балла)
@@ -138,7 +131,7 @@ fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean = (a.ent
  *     -> a changes to mutableMapOf() aka becomes empty
  */
 fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>) {
-    for ((key) in b.entries.filter { it in a.entries }) a.remove(key)
+    for (key in b.filter { it in a.entries }.keys) a.remove(key)
 }
 
 
@@ -171,8 +164,15 @@ fun whoAreInBoth(a: List<String>, b: List<String>): List<String> = a.intersect(b
  */
 fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<String, String> {
     val map = mapA.toMutableMap()
-    for ((name, number) in mapB) map[name] =
-        if (name in mapA) setOf("${map[name]}", number).joinToString(separator = ", ") else number
+    for ((name, number) in mapB) {
+        val phones =
+            if (name in mapA) {
+                setOf("${map[name]}", number).joinToString(separator = ", ")
+            } else {
+                number
+            }
+        map[name] = phones
+    }
     return map
 }
 
@@ -188,10 +188,8 @@ fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<S
  *
  *   listOf("MSFT" to 100.0, "NFLX" to 40.0) -> mapOf("MSFT" to 100.0, NFLX=40.0)
  */
-fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Double> {
-    return stockPrices.groupBy { it.first }.mapValues { it -> it.value.map { it.second } }
-        .mapValues { it.value.sum() / it.value.size }
-}
+fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Double> =
+    stockPrices.groupBy({ it.first }, { it.second }).mapValues { mean(it.value) }
 
 /**
  * Средняя (4 балла)
@@ -327,8 +325,10 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
     val map = mutableMapOf<Int, Int>()
     for (i in list.indices) {
-        if (number - list[i] in map) return list.indexOf(number - list[i]) to i
-        else map[list[i]] = number - list[i]
+        if (number - list[i] in map) {
+            return if (i < map[number - list[i]]!!) i to map[number - list[i]]!!
+            else map[number - list[i]]!! to i
+        } else map[list[i]] = i
     }
     return -1 to -1
 }
