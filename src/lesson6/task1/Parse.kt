@@ -188,12 +188,14 @@ fun bestLongJump(jumps: String): Int {
     val str = jumps.split(" ")
     val digits = (0..9).toList().map { it.toString() }
     val whiteList = digits + listOf(" ", "%", "-")
-    val allowed = jumps.isNotEmpty() && jumps.all { it.toString() in whiteList }
+    val allowed = jumps.all { it.toString() in whiteList }
     var mx = -1
     if (allowed) {
         for (item in str) {
-            if (item.all { it.isDigit() }) {
+            try {
                 mx = maxOf(mx, item.toInt())
+            } catch (_: Exception) {
+                //
             }
         }
         return mx
