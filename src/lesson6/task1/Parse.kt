@@ -383,6 +383,7 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
         while (x < commands.length) {
             if (commands[x] == '[') rc++
             else if (commands[x] == ']') rc--
+            if (rc < 0) return false
             x++
         }
         return rc == 0
@@ -396,7 +397,7 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     var x: Int
     var comID = 0
     //Проверяем команды на допустимые символы, а также на целостность циклов
-    if (commands.all { it in whiteList } && loopsIsClean()) {
+    if (commands.isNotEmpty() && commands.all { it in whiteList } && loopsIsClean()) {
         while (comID < commands.length && commandCount < limit) {
             if (commands[comID] == '<') {
                 currPos--
