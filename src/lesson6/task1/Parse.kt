@@ -5,6 +5,7 @@ package lesson6.task1
 import lesson2.task2.daysInMonth
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
+import java.util.Collections.max
 import kotlin.math.floor
 
 // Урок 6: разбор строк, исключения
@@ -185,22 +186,17 @@ fun flattenPhoneNumber(phone: String): String {
  * При нарушении формата входной строки или при отсутствии в ней чисел, вернуть -1.
  */
 fun bestLongJump(jumps: String): Int {
-    val str = jumps.split(" ")
-    val digits = (0..9).toList().map { it.toString() }
-    val whiteList = digits + listOf(" ", "%", "-")
-    val allowed = jumps.all { it.toString() in whiteList }
-    var mx = -1
-    if (allowed) {
-        for (item in str) {
-            try {
-                mx = maxOf(mx, item.toInt())
-            } catch (_: Exception) {
-                //
-            }
-        }
-        return mx
+    val whiteList = (0..9).toList().map { it.toString() } + listOf(" ", "%", "-")
+    return try {
+        if (jumps.all { it.toString() in whiteList }) {
+            max(
+                Regex("\\d+").findAll(jumps)
+                    .map { it.groupValues[0].toInt() }.toList()
+            )
+        } else -1
+    } catch (e: Exception) {
+        -1
     }
-    return -1
 }
 
 /**
@@ -216,18 +212,14 @@ fun bestLongJump(jumps: String): Int {
  */
 fun bestHighJump(jumps: String): Int {
     val whiteList = (0..9).toList().map { it.toString() } + listOf("+", "%", " ", "-")
-    val str = jumps.split(" ")
-    val results = mutableListOf<Int>()
-    val allowed = jumps.all { it.toString() in whiteList }
-    if (allowed) {
-        for (i in str.indices step 2) {
-            val key = str[i].toInt()
-            val value = str[i + 1]
-            if (value.any { it == '+' }) results += key
-        }
-        return results.max()
+    return try {
+        if (jumps.all { it.toString() in whiteList })
+            max(Regex("""\d+\s+\+""").findAll(jumps)
+                .map { it.groupValues }.toList().map { it[0].split(" ")[0].toInt() })
+        else -1
+    } catch (e: Exception) {
+        -1
     }
-    return -1
 }
 
 /**
@@ -376,8 +368,8 @@ fun fromRoman(roman: String): Int {
  *
  */
 fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
-    fun loopsIsClean(): Boolean {
-        var rc = 0
+    var rc = 0
+    fun loopsAreClean(): Boolean {
         var x = 0
         while (x < commands.length) {
             if (commands[x] == '[') rc++
@@ -388,15 +380,14 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
         return rc == 0
     }
 
-    var rc = 0
+    var x: Int
     val cellField = Array(cells) { 0 }
     val whiteList = listOf('+', '-', '>', '<', '[', ']', ' ')
     var currPos = floor((cells / 2).toDouble()).toInt()
     var commandCount = 0
-    var x: Int
     var comID = 0
     //Проверяем команды на допустимые символы, а также на целостность циклов
-    if (commands.isNotEmpty() && commands.all { it in whiteList } && loopsIsClean()) {
+    if (commands.isNotEmpty() && commands.all { it in whiteList } && loopsAreClean()) {
         while (comID < commands.length && commandCount < limit) {
             if (commands[comID] == '<') {
                 currPos--
