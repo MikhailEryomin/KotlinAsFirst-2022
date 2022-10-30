@@ -101,9 +101,8 @@ fun dateStrToDigit(str: String): String {
         val days = date[0].toIntOrNull()
         val month = months[date[1]]
         val year = date[2].toIntOrNull()
-        if (month != null && days != null && year != null && daysInMonth(month, year) >= days) {
-            String.format("%02d.%02d.%d", days, month, year)
-        } else ""
+        if (month == null || days == null || year == null || daysInMonth(month, year) < days) ""
+        else String.format("%02d.%02d.%d", days, month, year)
     } else {
         ""
     }
@@ -140,9 +139,8 @@ fun dateDigitToStr(digital: String): String {
         val monthId = date[1].toIntOrNull()
         val year = date[2].toIntOrNull()
         val month = months[monthId]
-        if (monthId != null && month != null && days != null && year != null && daysInMonth(monthId, year) >= days) {
-            "$days $month $year"
-        } else ""
+        if (monthId == null || month == null || days == null || year == null || daysInMonth(monthId, year) < days) ""
+        else "$days $month $year"
     } else {
         ""
     }
@@ -166,10 +164,7 @@ fun flattenPhoneNumber(phone: String): String {
     val filter = setOf('(', ')', '-', ' ')
     val whiteList = (0..9).map { it.digitToChar() }.toSet() + filter + setOf('+')
     val allowed = phone.toSet().all { it in whiteList }
-    if (allowed && "()" !in phone) {
-        return phone.filter { it !in filter }
-    }
-    return ""
+    return if (allowed && "()" !in phone) phone.filter { it !in filter } else ""
 }
 
 /**
