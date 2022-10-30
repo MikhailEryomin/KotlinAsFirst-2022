@@ -6,6 +6,7 @@ import lesson2.task2.daysInMonth
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import java.util.Collections.max
+import kotlin.math.exp
 import kotlin.math.floor
 
 // Урок 6: разбор строк, исключения
@@ -95,16 +96,15 @@ fun dateStrToDigit(str: String): String {
         "ноября" to 11,
         "декабря" to 12
     )
-    return try {
-        val date = str.split(" ")
-        val days = date[0].toInt()
+    val date = str.split(" ")
+    return if (date.size == 3) {
+        val days = date[0].toIntOrNull()
         val month = months[date[1]]
-        val year = date[2].toInt()
-        if (month != null && daysInMonth(month, year) >= days) {
+        val year = date[2].toIntOrNull()
+        if (month != null && days != null && year != null && daysInMonth(month, year) >= days) {
             String.format("%02d.%02d.%d", days, month, year)
-        } else
-            ""
-    } catch (e: Exception) {
+        } else ""
+    } else {
         ""
     }
 }
@@ -134,18 +134,16 @@ fun dateDigitToStr(digital: String): String {
         11 to "ноября",
         12 to "декабря"
     )
-    return try {
-        val date = digital.split(".")
-        if (date.size == 3) {
-            val days = date[0].toInt()
-            val monthId = date[1].toInt()
-            val year = date[2].toInt()
-            val month = months[monthId]
-            if (month != null && daysInMonth(monthId, year) >= days) {
-                "$days $month $year"
-            } else ""
+    val date = digital.split(".")
+    return if (date.size == 3) {
+        val days = date[0].toIntOrNull()
+        val monthId = date[1].toIntOrNull()
+        val year = date[2].toIntOrNull()
+        val month = months[monthId]
+        if (monthId != null && month != null && days != null && year != null && daysInMonth(monthId, year) >= days) {
+            "$days $month $year"
         } else ""
-    } catch (e: Exception) {
+    } else {
         ""
     }
 }
@@ -165,12 +163,11 @@ fun dateDigitToStr(digital: String): String {
  * PS: Дополнительные примеры работы функции можно посмотреть в соответствующих тестах.
  */
 fun flattenPhoneNumber(phone: String): String {
-    val whiteList = (0..9).toList().map { it.toString() } + listOf(" ", "+", "-", "(", ")")
-    val allowed = phone.toList().all { it.toString() in whiteList }
-    val filter = listOf("(", ")", " ", "-")
-
+    val filter = setOf('(', ')', '-', ' ')
+    val whiteList = (0..9).map { it.digitToChar() }.toSet() + filter + setOf('+')
+    val allowed = phone.toSet().all { it in whiteList }
     if (allowed && "()" !in phone) {
-        return phone.filter { it.toString() !in filter }
+        return phone.filter { it !in filter }
     }
     return ""
 }
@@ -186,15 +183,11 @@ fun flattenPhoneNumber(phone: String): String {
  * При нарушении формата входной строки или при отсутствии в ней чисел, вернуть -1.
  */
 fun bestLongJump(jumps: String): Int {
-    val whiteList = (0..9).toList().map { it.toString() } + listOf(" ", "%", "-")
-    return try {
-        if (jumps.all { it.toString() in whiteList }) {
-            max(
-                Regex("\\d+").findAll(jumps)
-                    .map { it.groupValues[0].toInt() }.toList()
-            )
-        } else -1
-    } catch (e: Exception) {
+    val whiteList = (0..9).map { it.digitToChar() }.toSet() + setOf(' ', '%', '-')
+    return if (jumps.all { it in whiteList } && !jumps.contains(("""[-\%]\d+""").toRegex())) {
+        val reg = Regex("\\d+").findAll(jumps).map { it.groupValues }.toList().map { it[0].toInt() }
+        if (reg.isEmpty()) -1 else max(reg)
+    } else {
         -1
     }
 }
@@ -211,15 +204,12 @@ fun bestLongJump(jumps: String): Int {
  * вернуть -1.
  */
 fun bestHighJump(jumps: String): Int {
-    val whiteList = (0..9).toList().map { it.toString() } + listOf("+", "%", " ", "-")
-    return try {
-        if (jumps.all { it.toString() in whiteList })
-            max(Regex("""\d+\s+\+""").findAll(jumps)
-                .map { it.groupValues }.toList().map { it[0].split(" ")[0].toInt() })
-        else -1
-    } catch (e: Exception) {
-        -1
-    }
+    //Проверка на образец
+    return if (jumps.matches(("""(\d+\s+[\+\-\%]+\s*)+""").toRegex())) {
+        val reg = Regex("""\d+\s+[%-]*\+""").findAll(jumps)
+            .map { it.groupValues }.toList().map { it[0].split(" ")[0].toInt() }
+        if (reg.isEmpty()) -1 else max(reg)
+    } else -1
 }
 
 /**
@@ -232,22 +222,19 @@ fun bestHighJump(jumps: String): Int {
  * Про нарушении формата входной строки бросить исключение IllegalArgumentException
  */
 fun plusMinus(expression: String): Int {
-    val whiteList = (0..9).toList().map { it.toString() } + listOf("+", "-", " ")
-    val str = expression.trim().split(" ")
-    val allowed =
-        expression.isNotEmpty() && expression.all { it.toString() in whiteList } && expression[0] !in listOf('+', '-')
-    var result: Int
+    val allowed = expression.matches(("""(\d+\s+[\+\-]\s+\d+)+""").toRegex()) &&
+            expression[0] !in listOf('+', '-') || expression.trim().all { it.isDigit() }
     if (allowed) {
-        result = str[0].toInt()
+        val str = expression.trim().split(" ")
+        var result = str[0].toInt()
         for (i in 1 until str.size step 2) {
             val nextIsDigit = str[i + 1].all { it.isDigit() }
-            if (nextIsDigit) {
-                if (str[i] == "+") {
-                    result += str[i + 1].toInt()
-                } else if (str[i] == "-") {
-                    result -= str[i + 1].toInt()
-                }
-            } else throw IllegalArgumentException()
+            if (!nextIsDigit) throw IllegalArgumentException()
+            if (str[i] == "+") {
+                result += str[i + 1].toInt()
+            } else if (str[i] == "-") {
+                result -= str[i + 1].toInt()
+            }
         }
         return result
     }
@@ -266,15 +253,13 @@ fun plusMinus(expression: String): Int {
 fun firstDuplicateIndex(str: String): Int {
     val words = str.trim().uppercase().split(" ")
     var n = 0
-    var id = -1
     for (i in 0 until words.size - 1) {
         if (words[i] == words[i + 1]) {
-            id = n
-            break
+            return n
         }
         n += words[i].length + 1
     }
-    return id
+    return -1
 }
 
 /**
@@ -290,8 +275,7 @@ fun firstDuplicateIndex(str: String): Int {
  */
 fun mostExpensive(description: String): String {
     return try {
-        if (description.isNotEmpty()) description.split("; ")
-            .map { it.split(" ").first() to it.split(" ").last() }
+        if (description.isNotEmpty()) description.split("; ").map { it.split(" ").first() to it.split(" ").last() }
             .maxBy { it.second.toDouble() }.first else ""
     } catch (e: Exception) {
         ""
@@ -311,13 +295,7 @@ fun mostExpensive(description: String): String {
  */
 fun fromRoman(roman: String): Int {
     val letters = mapOf(
-        'I' to 1,
-        'V' to 5,
-        'X' to 10,
-        'L' to 50,
-        'C' to 100,
-        'D' to 500,
-        'M' to 1000
+        'I' to 1, 'V' to 5, 'X' to 10, 'L' to 50, 'C' to 100, 'D' to 500, 'M' to 1000
     )
     var result = 0
     if (roman.isNotEmpty() && roman.all { it in letters.keys }) {
@@ -367,9 +345,11 @@ fun fromRoman(roman: String): Int {
  * IllegalArgumentException должен бросаться даже если ошибочная команда не была достигнута в ходе выполнения.
  *
  */
+
+//Задача в процессе обработки
 fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
-    var rc = 0
-    fun loopsAreClean(): Boolean {
+    fun loopsIsClean(): Boolean {
+        var rc = 0
         var x = 0
         while (x < commands.length) {
             if (commands[x] == '[') rc++
@@ -380,14 +360,15 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
         return rc == 0
     }
 
-    var x: Int
+    var rc = 0
     val cellField = Array(cells) { 0 }
     val whiteList = listOf('+', '-', '>', '<', '[', ']', ' ')
     var currPos = floor((cells / 2).toDouble()).toInt()
     var commandCount = 0
+    var x: Int
     var comID = 0
     //Проверяем команды на допустимые символы, а также на целостность циклов
-    if (commands.isNotEmpty() && commands.all { it in whiteList } && loopsAreClean()) {
+    if (commands.isNotEmpty() && commands.all { it in whiteList } && loopsIsClean()) {
         while (comID < commands.length && commandCount < limit) {
             if (commands[comID] == '<') {
                 currPos--
