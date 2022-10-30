@@ -222,7 +222,7 @@ fun bestHighJump(jumps: String): Int {
  * Про нарушении формата входной строки бросить исключение IllegalArgumentException
  */
 fun plusMinus(expression: String): Int {
-    val allowed = expression.matches(("""(\d+\s+[\+\-]\s+\d+)+""").toRegex()) &&
+    val allowed = expression.matches(("""(\d*\s+[\+\-]\s+\d*)+""").toRegex()) &&
             expression[0] !in listOf('+', '-') || expression.trim().all { it.isDigit() }
     if (allowed) {
         val str = expression.trim().split(" ")
