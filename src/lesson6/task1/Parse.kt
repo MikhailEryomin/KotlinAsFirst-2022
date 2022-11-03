@@ -342,77 +342,80 @@ fun fromRoman(roman: String): Int {
  */
 
 //Задача в процессе обработки
-fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
-    fun loopsIsClean(): Boolean {
-        var rc = 0
-        var x = 0
-        while (x < commands.length) {
-            if (commands[x] == '[') rc++
-            else if (commands[x] == ']') rc--
-            if (rc < 0) return false
-            x++
-        }
-        return rc == 0
-    }
-
+fun loopsIsClean(commands: String): Boolean {
     var rc = 0
-    val cellField = Array(cells) { 0 }
+    var x = 0
+    while (x < commands.length) {
+        if (commands[x] == '[') rc++
+        else if (commands[x] == ']') rc--
+        if (rc < 0) return false
+        x++
+    }
+    return rc == 0
+}
+
+
+fun checkLoopBorders(commands: String): Boolean {
+    var rc = 0
+    var x = 0
+    while (x < commands.length) {
+        if (commands[x] == '[') rc++
+        else if (commands[x] == ']') rc--
+        if (rc < 0) return false
+        x++
+    }
+    return rc == 0
+}
+
+fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     val whiteList = listOf('+', '-', '>', '<', '[', ']', ' ')
+    if (!(commands.isNotEmpty() && commands.all { it in whiteList } && checkLoopBorders(commands))) throw IllegalArgumentException()
+    var rc = 0
+    var x: Int
+    val cellField = Array(cells) { 0 }.toMutableList()
     var currPos = floor((cells / 2).toDouble()).toInt()
     var commandCount = 0
-    var x: Int
     var comID = 0
     //Проверяем команды на допустимые символы, а также на целостность циклов
-    if (commands.isNotEmpty() && commands.all { it in whiteList } && loopsIsClean()) {
-        while (comID < commands.length && commandCount < limit) {
-            if (commands[comID] == '<') {
-                currPos--
-                if (currPos < 0) throw IllegalStateException()
-            } else if (commands[comID] == '>') {
-                currPos++
-                if (currPos >= cells) throw IllegalStateException()
-            } else if (commands[comID] == '+') {
-                cellField[currPos]++
-            } else if (commands[comID] == '-') {
-                cellField[currPos]--
-            } else if (commands[comID] == '[') {
-                // Если встречаем начало цикла и значение ячейки 0, то нужно найти индекс закрывающей скобки
-                // и перепрыгнуть к ней
-                if (cellField[currPos] == 0) {
-                    var endLoopId = -1
-                    x = comID
-                    while (x < commands.length) {
-                        if (commands[x] == '[') rc++
-                        else if (commands[x] == ']') rc--
-                        if (rc == 0) {
-                            endLoopId = x
-                            break
-                        }
-                        x++
+    while (comID < commands.length && commandCount < limit) {
+        if (currPos < 0 || currPos >= cells) throw IllegalStateException("Out of bounds")
+        if (commands[comID] == '<') {
+            currPos--
+        } else if (commands[comID] == '>') {
+            currPos++
+        } else if (commands[comID] == '+') {
+            cellField[currPos]++
+        } else if (commands[comID] == '-') {
+            cellField[currPos]--
+        } else if (commands[comID] == '[') {
+            if (cellField[currPos] == 0) {
+                x = comID
+                while (x < commands.length) {
+                    if (commands[x] == '[') rc++
+                    else if (commands[x] == ']') rc--
+                    if (rc == 0) {
+                        comID = x
+                        break
                     }
-                    comID = endLoopId
-                }
-            } else if (commands[comID] == ']') {
-                // Если встречаем начало цикла и значение ячейки 1, то нужно найти индекс открывающей скобки
-                // и перепрыгнуть к ней
-                if (cellField[currPos] != 0) {
-                    var startLoopId = -1
-                    x = comID
-                    while (x > 0) {
-                        if (commands[x] == '[') rc++
-                        else if (commands[x] == ']') rc--
-                        if (rc == 0) {
-                            startLoopId = x
-                            break
-                        }
-                        x--
-                    }
-                    comID = startLoopId
+                    x++
                 }
             }
-            comID++
-            commandCount++
+        } else if (commands[comID] == ']') {
+            if (cellField[currPos] != 0) {
+                x = comID
+                while (x > 0) {
+                    if (commands[x] == '[') rc++
+                    else if (commands[x] == ']') rc--
+                    if (rc == 0) {
+                        comID = x
+                        break
+                    }
+                    x--
+                }
+            }
         }
-    } else throw IllegalArgumentException()
-    return cellField.toList()
+        comID++
+        commandCount++
+    }
+    return cellField
 }
