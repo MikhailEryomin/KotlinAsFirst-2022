@@ -341,20 +341,6 @@ fun fromRoman(roman: String): Int {
  *
  */
 
-//Задача в процессе обработки
-fun loopsIsClean(commands: String): Boolean {
-    var rc = 0
-    var x = 0
-    while (x < commands.length) {
-        if (commands[x] == '[') rc++
-        else if (commands[x] == ']') rc--
-        if (rc < 0) return false
-        x++
-    }
-    return rc == 0
-}
-
-
 fun checkLoopBorders(commands: String): Boolean {
     var rc = 0
     var x = 0
@@ -369,7 +355,7 @@ fun checkLoopBorders(commands: String): Boolean {
 
 fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     val whiteList = listOf('+', '-', '>', '<', '[', ']', ' ')
-    if (!(commands.isNotEmpty() && commands.all { it in whiteList } && checkLoopBorders(commands))) throw IllegalArgumentException()
+    if (!(commands.all { it in whiteList } && checkLoopBorders(commands))) throw IllegalArgumentException()
     var rc = 0
     var x: Int
     val cellField = Array(cells) { 0 }.toMutableList()
@@ -378,11 +364,12 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     var comID = 0
     //Проверяем команды на допустимые символы, а также на целостность циклов
     while (comID < commands.length && commandCount < limit) {
-        if (currPos < 0 || currPos >= cells) throw IllegalStateException("Out of bounds")
         if (commands[comID] == '<') {
             currPos--
+            if (currPos < 0) throw IllegalStateException("Out of bounds")
         } else if (commands[comID] == '>') {
             currPos++
+            if (currPos >= cells) throw IllegalStateException("Out of bounds")
         } else if (commands[comID] == '+') {
             cellField[currPos]++
         } else if (commands[comID] == '-') {
