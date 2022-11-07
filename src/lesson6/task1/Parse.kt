@@ -5,8 +5,6 @@ package lesson6.task1
 import lesson2.task2.daysInMonth
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
-import java.util.Collections.max
-import kotlin.math.exp
 import kotlin.math.floor
 
 // Урок 6: разбор строк, исключения
@@ -97,15 +95,12 @@ fun dateStrToDigit(str: String): String {
         "декабря" to 12
     )
     val date = str.split(" ")
-    return if (date.size == 3) {
-        val days = date[0].toIntOrNull()
-        val month = months[date[1]]
-        val year = date[2].toIntOrNull()
-        if (month == null || days == null || year == null || daysInMonth(month, year) < days) ""
-        else String.format("%02d.%02d.%d", days, month, year)
-    } else {
-        ""
-    }
+    if (date.size != 3) return ""
+    val days = date[0].toIntOrNull() ?: return ""
+    val month = months[date[1]] ?: return ""
+    val year = date[2].toIntOrNull() ?: return ""
+    if (daysInMonth(month, year) < days) return ""
+    return String.format("%02d.%02d.%d", days, month, year)
 }
 
 /**
@@ -134,16 +129,13 @@ fun dateDigitToStr(digital: String): String {
         12 to "декабря"
     )
     val date = digital.split(".")
-    return if (date.size == 3) {
-        val days = date[0].toIntOrNull()
-        val monthId = date[1].toIntOrNull()
-        val year = date[2].toIntOrNull()
-        val month = months[monthId]
-        if (monthId == null || month == null || days == null || year == null || daysInMonth(monthId, year) < days) ""
-        else "$days $month $year"
-    } else {
-        ""
-    }
+    if (date.size != 3) return ""
+    val days = date[0].toIntOrNull() ?: return ""
+    val monthId = date[1].toIntOrNull() ?: return ""
+    val year = date[2].toIntOrNull() ?: return ""
+    val month = months[monthId] ?: return ""
+    if (daysInMonth(monthId, year) < days) return ""
+    return "$days $month $year"
 }
 
 /**
@@ -179,12 +171,8 @@ fun flattenPhoneNumber(phone: String): String {
  */
 fun bestLongJump(jumps: String): Int {
     val whiteList = (0..9).map { it.digitToChar() }.toSet() + setOf(' ', '%', '-')
-    return if (jumps.all { it in whiteList } && !jumps.contains(("""[-\%]\d+""").toRegex())) {
-        val reg = Regex("\\d+").findAll(jumps).map { it.groupValues }.toList().map { it[0].toInt() }
-        if (reg.isEmpty()) -1 else max(reg)
-    } else {
-        -1
-    }
+    if (!(jumps.all { it in whiteList } && !jumps.contains(("""[-\%]\d+""").toRegex()))) return -1
+    return Regex("\\d+").findAll(jumps).map { it.groupValues }.maxOfOrNull { it[0].toInt() } ?: -1
 }
 
 /**
@@ -199,12 +187,9 @@ fun bestLongJump(jumps: String): Int {
  * вернуть -1.
  */
 fun bestHighJump(jumps: String): Int {
-    //Проверка на образец
-    return if (jumps.matches(("""(\d+\s+[\+\-\%]+\s*)+""").toRegex())) {
-        val reg = Regex("""\d+\s+[%-]*\+""").findAll(jumps)
-            .map { it.groupValues }.toList().map { it[0].split(" ")[0].toInt() }
-        if (reg.isEmpty()) -1 else max(reg)
-    } else -1
+    if (!jumps.matches(("""(\d+\s+[\+\-\%]+\s?)+""").toRegex())) return -1
+    return Regex("""\d+\s+[%-]*\+""").findAll(jumps)
+        .map { it.groupValues }.maxOfOrNull { it[0].split(" ")[0].toInt() } ?: -1
 }
 
 /**
@@ -217,23 +202,20 @@ fun bestHighJump(jumps: String): Int {
  * Про нарушении формата входной строки бросить исключение IllegalArgumentException
  */
 fun plusMinus(expression: String): Int {
-    val allowed = expression.matches(("""(\d*\s+[\+\-]\s+\d*)+""").toRegex()) &&
-            expression[0] !in listOf('+', '-') || expression.trim().all { it.isDigit() }
-    if (allowed) {
-        val str = expression.trim().split(" ")
-        var result = str[0].toInt()
-        for (i in 1 until str.size step 2) {
-            val nextIsDigit = str[i + 1].all { it.isDigit() }
-            if (!nextIsDigit) throw IllegalArgumentException()
-            if (str[i] == "+") {
-                result += str[i + 1].toInt()
-            } else if (str[i] == "-") {
-                result -= str[i + 1].toInt()
-            }
+    val allowed = expression.matches(("""(\d+\s+[+\-]\s+)+\d+""").toRegex()) || expression.trim().all { it.isDigit() }
+    if (!allowed) throw IllegalArgumentException()
+    val str = expression.trim().split(" ")
+    var result = str[0].toInt()
+    for (i in 1 until str.size step 2) {
+        val nextIsDigit = str[i + 1].all { it.isDigit() }
+        if (!nextIsDigit) throw IllegalArgumentException()
+        if (str[i] == "+") {
+            result += str[i + 1].toInt()
+        } else if (str[i] == "-") {
+            result -= str[i + 1].toInt()
         }
-        return result
     }
-    throw IllegalArgumentException()
+    return result
 }
 
 /**
@@ -269,12 +251,9 @@ fun firstDuplicateIndex(str: String): Int {
  * Все цены должны быть больше нуля либо равны нулю.
  */
 fun mostExpensive(description: String): String {
-    return try {
-        if (description.isNotEmpty()) description.split("; ").map { it.split(" ").first() to it.split(" ").last() }
-            .maxBy { it.second.toDouble() }.first else ""
-    } catch (e: Exception) {
-        ""
-    }
+    val pairs = description.split("; ").map { it.split(" ") }
+    if (pairs.any { it.size != 2 }) return ""
+    return pairs.maxBy { it.last().toDouble() }.first()
 }
 
 /**
@@ -366,10 +345,10 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     while (comID < commands.length && commandCount < limit) {
         if (commands[comID] == '<') {
             currPos--
-            if (currPos < 0) throw IllegalStateException("Out of bounds")
+            if (currPos < 0) throw IllegalStateException("Out of bounds (-1)")
         } else if (commands[comID] == '>') {
             currPos++
-            if (currPos >= cells) throw IllegalStateException("Out of bounds")
+            if (currPos >= cells) throw IllegalStateException("Out of bounds (over)")
         } else if (commands[comID] == '+') {
             cellField[currPos]++
         } else if (commands[comID] == '-') {
