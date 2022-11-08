@@ -187,7 +187,7 @@ fun bestLongJump(jumps: String): Int {
  * вернуть -1.
  */
 fun bestHighJump(jumps: String): Int {
-    if (!jumps.matches(("""(\d+\s+[\+\-\%]+\s?)+""").toRegex())) return -1
+    if (!jumps.matches(("""^(\d+\s+[\+\-\%]+\s)*\d+\s+[\+\-\%]+""").toRegex())) return -1
     return Regex("""\d+\s+[%-]*\+""").findAll(jumps)
         .map { it.groupValues }.maxOfOrNull { it[0].split(" ")[0].toInt() } ?: -1
 }
@@ -202,7 +202,8 @@ fun bestHighJump(jumps: String): Int {
  * Про нарушении формата входной строки бросить исключение IllegalArgumentException
  */
 fun plusMinus(expression: String): Int {
-    val allowed = expression.matches(("""(\d+\s+[+\-]\s+)+\d+""").toRegex()) || expression.trim().all { it.isDigit() }
+    val allowed = expression.matches(("""(\d+\s+[+\-]\s+)+\d+""").toRegex()) ||
+            expression.trim().all { it.isDigit() }
     if (!allowed) throw IllegalArgumentException()
     val str = expression.trim().split(" ")
     var result = str[0].toInt()
@@ -252,7 +253,8 @@ fun firstDuplicateIndex(str: String): Int {
  */
 fun mostExpensive(description: String): String {
     val pairs = description.split("; ").map { it.split(" ") }
-    if (pairs.any { it.size != 2 }) return ""
+    if (pairs.any { it.size != 2 || it.last().toDoubleOrNull() == null || it.last().toDouble() < 0.0 }) return ""
+    //До сюда дойдет только набор, в котором есть числа, все условия соблюдены
     return pairs.maxBy { it.last().toDouble() }.first()
 }
 
@@ -272,15 +274,13 @@ fun fromRoman(roman: String): Int {
         'I' to 1, 'V' to 5, 'X' to 10, 'L' to 50, 'C' to 100, 'D' to 500, 'M' to 1000
     )
     var result = 0
-    if (roman.isNotEmpty() && roman.all { it in letters.keys }) {
-        for (i in 0 until roman.length - 1) {
-            val curr = roman[i]
-            if (letters[curr]!! < letters[roman[i + 1]]!!) result -= letters[curr]!!
-            else result += letters[roman[i]]!!
-        }
-        return result + letters[roman.last()]!!
+    if (!(roman.isNotEmpty() && roman.all { it in letters.keys })) return -1
+    for (i in 0 until roman.length - 1) {
+        val curr = roman[i]
+        if (letters[curr]!! < letters[roman[i + 1]]!!) result -= letters[curr]!!
+        else result += letters[roman[i]]!!
     }
-    return -1
+    return result + letters[roman.last()]!!
 }
 
 /**
