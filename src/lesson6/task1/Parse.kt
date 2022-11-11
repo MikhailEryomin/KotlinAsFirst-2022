@@ -253,7 +253,10 @@ fun firstDuplicateIndex(str: String): Int {
  */
 fun mostExpensive(description: String): String {
     val pairs = description.split("; ").map { it.split(" ") }
-    if (pairs.any { it.size != 2 || it.last().toDoubleOrNull() == null || it.last().toDouble() < 0.0 }) return ""
+    if (pairs.any {
+            val a = it.last().toDoubleOrNull()
+            it.size != 2 || a == null || a < 0.0
+        }) return ""
     //До сюда дойдет только набор, в котором есть числа, все условия соблюдены
     return pairs.maxBy { it.last().toDouble() }.first()
 }
