@@ -2,7 +2,14 @@
 
 package lesson7.task1
 
+import ru.spbstu.wheels.out
+import ru.spbstu.wheels.toMutableMap
+import java.io.BufferedWriter
 import java.io.File
+import java.util.*
+import java.util.Collections.max
+import kotlin.math.abs
+import kotlin.math.floor
 
 // Урок 7: работа с файлами
 // Урок интегральный, поэтому его задачи имеют сильно увеличенную стоимость
@@ -63,7 +70,14 @@ fun alignFile(inputName: String, lineLength: Int, outputName: String) {
  * Подчёркивание в середине и/или в конце строк значения не имеет.
  */
 fun deleteMarked(inputName: String, outputName: String) {
-    TODO()
+    val output = File(outputName).bufferedWriter()
+    for (item in File(inputName).readLines()) {
+        if (item.startsWith('_')) {
+            output.write(item)
+            output.newLine()
+        }
+    }
+    output.close()
 }
 
 /**
@@ -75,7 +89,17 @@ fun deleteMarked(inputName: String, outputName: String) {
  * Регистр букв игнорировать, то есть буквы е и Е считать одинаковыми.
  *
  */
-fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> = TODO()
+fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
+    val result = substrings.associateWith { 0 }.toMutableMap()
+    val text = File(inputName).readText().uppercase()
+    for (i in substrings.indices) {
+        for (j in text.indices) {
+            if (text.startsWith(substrings[i].uppercase(), j))
+                result[substrings[i]] = result[substrings[i]]!! + 1
+        }
+    }
+    return result
+}
 
 
 /**
@@ -92,7 +116,26 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
  *
  */
 fun sibilants(inputName: String, outputName: String) {
-    TODO()
+    val output = File(outputName).bufferedWriter()
+    val compareMap = mapOf('Ы' to 'И', 'Я' to 'А', 'Ю' to 'У', 'ы' to 'и', 'я' to 'а', 'ю' to 'у')
+    val letters = setOf('Ж', 'Ч', 'Ш', 'Щ')
+    for (str in File(inputName).readLines()) {
+        val line = "$str*"
+        var i = 0
+        val toWrite = StringBuilder()
+        while (i < line.length - 1) {
+            val sym = line[i]
+            val next = line[i + 1]
+            if (sym.uppercaseChar() in letters && next in compareMap.keys) {
+                toWrite.append(sym, compareMap[next])
+                i++
+            } else toWrite.append(sym)
+            i++
+        }
+        output.write(toWrite.toString())
+        output.newLine()
+    }
+    output.close()
 }
 
 /**
@@ -113,7 +156,19 @@ fun sibilants(inputName: String, outputName: String) {
  *
  */
 fun centerFile(inputName: String, outputName: String) {
-    TODO()
+    val input = File(inputName).readLines()
+    val theLongest = max(input).length
+    val output = File(outputName).bufferedWriter()
+    for (str in input) {
+        val line = str.trim()
+        val toWrite = StringBuilder()
+        val spacesCount = theLongest / 2 - line.length / 2
+        for (i in 0 until spacesCount) toWrite.append(" ")
+        toWrite.append(line)
+        output.write(toWrite.toString())
+        output.newLine()
+    }
+    output.close()
 }
 
 /**
@@ -144,7 +199,29 @@ fun centerFile(inputName: String, outputName: String) {
  * 8) Если входной файл удовлетворяет требованиям 1-7, то он должен быть в точности идентичен выходному файлу
  */
 fun alignFileByWidth(inputName: String, outputName: String) {
-    TODO()
+    val input = File(inputName).readLines()
+    val output = File(outputName).bufferedWriter()
+    val mx = input.maxBy { it.replace("\\s{2,}".toRegex(), " ").length }.trim().length
+    for (str in input) {
+        val line = str.trim().replace("\\s{2,}".toRegex(), " ")
+        val toWrite = StringBuilder()
+        val spaceCount = line.count { it == ' ' }
+        val newSpacesCount = floor((mx - line.length) / spaceCount.toDouble()).toInt()
+        var spacesLeft = (mx - line.length) - newSpacesCount * spaceCount
+        for (char in line) {
+            if (char == ' ') {
+                toWrite.append(' ')
+                toWrite.append(" ".repeat(newSpacesCount))
+                if (spacesLeft > 0) {
+                    toWrite.append(' ')
+                    spacesLeft--
+                }
+            } else toWrite.append(char)
+        }
+        output.write(toWrite.toString())
+        output.newLine()
+    }
+    output.close()
 }
 
 /**
@@ -167,7 +244,24 @@ fun alignFileByWidth(inputName: String, outputName: String) {
  * Ключи в ассоциативном массиве должны быть в нижнем регистре.
  *
  */
-fun top20Words(inputName: String): Map<String, Int> = TODO()
+fun top20Words(inputName: String): Map<String, Int> {
+    val top = mutableMapOf<String, Int>()
+    for (line in File(inputName).readLines()) {
+        //сплитуем строчку по любым не буквенным символам
+        val words = line.split("""[^a-zA-ZА-Яа-яёЁ]""".toRegex())
+            .filter { it.contains("""[a-zA-ZА-Яа-яёЁ]""".toRegex()) }
+        for (element in words) {
+            val word = element.lowercase()
+            if (word in top) {
+                top[word] = top[word]!! + 1
+            } else {
+                top[word] = 1
+            }
+        }
+    }
+    val top20 = top.values.sortedDescending()
+    return if (top20.size >= 20) top.filter { it.value >= top20[19] } else top.filter { it.value >= 0 }
+}
 
 /**
  * Средняя (14 баллов)
@@ -205,7 +299,23 @@ fun top20Words(inputName: String): Map<String, Int> = TODO()
  * Обратите внимание: данная функция не имеет возвращаемого значения
  */
 fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: String) {
-    TODO()
+    val dict = dictionary.toMutableMap().mapKeys { it.key.lowercaseChar() }.mapValues { it.value.lowercase() }
+    val output = File(outputName).bufferedWriter()
+    for (line in File(inputName).readLines()) {
+        val toWrite = StringBuilder()
+        for (char in line) {
+            val key = char.lowercaseChar()
+            if (key in dict) {
+                if (char.isUpperCase()) toWrite.append(dict[key]!!.replaceFirstChar { it.uppercaseChar() })
+                else toWrite.append(dict[key])
+            } else {
+                toWrite.append(key)
+            }
+        }
+        output.write(toWrite.toString())
+        output.newLine()
+    }
+    output.close()
 }
 
 /**
@@ -233,7 +343,17 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
  * Обратите внимание: данная функция не имеет возвращаемого значения
  */
 fun chooseLongestChaoticWord(inputName: String, outputName: String) {
-    TODO()
+    val output = File(outputName).bufferedWriter()
+    var mxLength = -1
+    val results = mutableSetOf<String>()
+    for (word in File(inputName).readLines()) {
+        if (word.map { it.lowercaseChar() }.toSet().size == word.length && word.length >= mxLength) {
+            results.add(word)
+            mxLength = word.length
+        }
+    }
+    output.write(results.joinToString(separator = ", "))
+    output.close()
 }
 
 /**
@@ -268,15 +388,15 @@ Suspendisse ~~et elit in enim tempus iaculis~~.
  *
  * Соответствующий выходной файл:
 <html>
-    <body>
-        <p>
-            Lorem ipsum <i>dolor sit amet</i>, consectetur <b>adipiscing</b> elit.
-            Vestibulum lobortis. <s>Est vehicula rutrum <i>suscipit</i></s>, ipsum <s>lib</s>ero <i>placerat <b>tortor</b></i>.
-        </p>
-        <p>
-            Suspendisse <s>et elit in enim tempus iaculis</s>.
-        </p>
-    </body>
+<body>
+<p>
+Lorem ipsum <i>dolor sit amet</i>, consectetur <b>adipiscing</b> elit.
+Vestibulum lobortis. <s>Est vehicula rutrum <i>suscipit</i></s>, ipsum <s>lib</s>ero <i>placerat <b>tortor</b></i>.
+</p>
+<p>
+Suspendisse <s>et elit in enim tempus iaculis</s>.
+</p>
+</body>
 </html>
  *
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
@@ -319,65 +439,65 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
  *
  * Пример входного файла:
 ///////////////////////////////начало файла/////////////////////////////////////////////////////////////////////////////
-* Утка по-пекински
-    * Утка
-    * Соус
-* Салат Оливье
-    1. Мясо
-        * Или колбаса
-    2. Майонез
-    3. Картофель
-    4. Что-то там ещё
-* Помидоры
-* Фрукты
-    1. Бананы
-    23. Яблоки
-        1. Красные
-        2. Зелёные
+ * Утка по-пекински
+ * Утка
+ * Соус
+ * Салат Оливье
+1. Мясо
+ * Или колбаса
+2. Майонез
+3. Картофель
+4. Что-то там ещё
+ * Помидоры
+ * Фрукты
+1. Бананы
+23. Яблоки
+1. Красные
+2. Зелёные
 ///////////////////////////////конец файла//////////////////////////////////////////////////////////////////////////////
  *
  *
  * Соответствующий выходной файл:
 ///////////////////////////////начало файла/////////////////////////////////////////////////////////////////////////////
 <html>
-  <body>
-    <p>
-      <ul>
-        <li>
-          Утка по-пекински
-          <ul>
-            <li>Утка</li>
-            <li>Соус</li>
-          </ul>
-        </li>
-        <li>
-          Салат Оливье
-          <ol>
-            <li>Мясо
-              <ul>
-                <li>Или колбаса</li>
-              </ul>
-            </li>
-            <li>Майонез</li>
-            <li>Картофель</li>
-            <li>Что-то там ещё</li>
-          </ol>
-        </li>
-        <li>Помидоры</li>
-        <li>Фрукты
-          <ol>
-            <li>Бананы</li>
-            <li>Яблоки
-              <ol>
-                <li>Красные</li>
-                <li>Зелёные</li>
-              </ol>
-            </li>
-          </ol>
-        </li>
-      </ul>
-    </p>
-  </body>
+<body>
+<p>
+<ul>
+<li>
+Утка по-пекински
+<ul>
+<li>Утка</li>
+<li>Соус</li>
+</ul>
+</li>
+<li>
+Салат Оливье
+<ol>
+<li>Мясо
+<ul>
+<li>Или колбаса</li>
+</ul>
+</li>
+<li>Майонез</li>
+<li>Картофель</li>
+<li>Что-то там ещё</li>
+</ol>
+</li>
+<li>Помидоры</li>
+<li>Фрукты
+<ol>
+<li>Бананы</li>
+<li>Яблоки
+<ol>
+<li>Красные</li>
+<li>Зелёные</li>
+</ol>
+</li>
+</ol>
+</li>
+</ul>
+</p>
+</body>
 </html>
 ///////////////////////////////конец файла//////////////////////////////////////////////////////////////////////////////
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
@@ -404,27 +524,49 @@ fun markdownToHtml(inputName: String, outputName: String) {
  * Вывести в выходной файл процесс умножения столбиком числа lhv (> 0) на число rhv (> 0).
  *
  * Пример (для lhv == 19935, rhv == 111):
-   19935
-*    111
+19935
+ *    111
 --------
-   19935
+19935
 + 19935
 +19935
 --------
- 2212785
+2212785
  * Используемые пробелы, отступы и дефисы должны в точности соответствовать примеру.
  * Нули в множителе обрабатывать так же, как и остальные цифры:
-  235
-*  10
+235
+ *  10
 -----
-    0
+0
 +235
 -----
- 2350
+2350
  *
  */
+fun writeLine(content: String, output: BufferedWriter) {
+    output.write(content)
+    output.newLine()
+}
+
 fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
-    TODO()
+    val output = File(outputName).bufferedWriter()
+    val probResult = lhv * rhv
+    val max = maxOf(probResult.toString().length + 1, lhv.toString().length + 1, rhv.toString().length + 1)
+    writeLine("${" ".repeat(max - lhv.toString().length)}$lhv", output)
+    writeLine("*${" ".repeat(max - rhv.toString().length - 1)}$rhv", output)
+    writeLine("-".repeat(max), output)
+    var k = 0
+    val number = rhv.toString()
+    for (i in number.length - 1 downTo 0) {
+        val num = number[i].digitToInt()
+        val subRes = (lhv * num).toString()
+        if (k == 0) writeLine("${" ".repeat(max - subRes.length)}$subRes", output)
+        else writeLine("+${" ".repeat(abs(max - subRes.length - k - 1))}$subRes", output)
+        k++
+    }
+    writeLine("-".repeat(max), output)
+    writeLine("${" ".repeat(max - probResult.toString().length)}${probResult}", output)
+    output.close()
 }
 
 
@@ -434,16 +576,16 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  * Вывести в выходной файл процесс деления столбиком числа lhv (> 0) на число rhv (> 0).
  *
  * Пример (для lhv == 19935, rhv == 22):
-  19935 | 22
- -198     906
- ----
-    13
-    -0
-    --
-    135
-   -132
-   ----
-      3
+19935 | 22
+-198     906
+----
+13
+-0
+--
+135
+-132
+----
+3
 
  * Используемые пробелы, отступы и дефисы должны в точности соответствовать примеру.
  *
