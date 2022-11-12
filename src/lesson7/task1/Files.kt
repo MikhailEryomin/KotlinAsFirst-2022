@@ -154,13 +154,13 @@ fun sibilants(inputName: String, outputName: String) {
  */
 fun centerFile(inputName: String, outputName: String) {
     val input = File(inputName).readLines()
-    val theLongest = input.maxByOrNull { it.length }?.length ?: 0
+    val theLongest = input.maxByOrNull { it.trim().length }?.length ?: 0
     val output = File(outputName).bufferedWriter()
     for (str in input) {
         val line = str.trim()
         val toWrite = StringBuilder()
         val spacesCount = theLongest / 2 - line.length / 2
-        for (i in 0 until spacesCount) toWrite.append(" ")
+        toWrite.append(" ".repeat(spacesCount))
         toWrite.append(line)
         output.write(toWrite.toString())
         output.newLine()
@@ -343,11 +343,11 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
 fun chooseLongestChaoticWord(inputName: String, outputName: String) {
     val output = File(outputName).bufferedWriter()
     var mxLength = -1
-    var results = mutableSetOf<String>()
+    var results = mutableListOf<String>()
     for (word in File(inputName).readLines()) {
         val charSet = word.map { it.lowercaseChar() }.toSet()
         if (charSet.size == word.length && word.length > mxLength) {
-            results = mutableSetOf(word)
+            results = mutableListOf(word)
             mxLength = word.length
         } else if (charSet.size == word.length && word.length == mxLength) {
             results.add(word)
