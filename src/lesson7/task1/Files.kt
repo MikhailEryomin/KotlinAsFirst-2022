@@ -2,12 +2,8 @@
 
 package lesson7.task1
 
-import ru.spbstu.wheels.out
-import ru.spbstu.wheels.toMutableMap
 import java.io.BufferedWriter
 import java.io.File
-import java.util.*
-import java.util.Collections.max
 import kotlin.math.abs
 import kotlin.math.floor
 
@@ -72,7 +68,7 @@ fun alignFile(inputName: String, lineLength: Int, outputName: String) {
 fun deleteMarked(inputName: String, outputName: String) {
     val output = File(outputName).bufferedWriter()
     for (item in File(inputName).readLines()) {
-        if (item.startsWith('_')) {
+        if (!item.startsWith('_')) {
             output.write(item)
             output.newLine()
         }
@@ -91,11 +87,12 @@ fun deleteMarked(inputName: String, outputName: String) {
  */
 fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
     val result = substrings.associateWith { 0 }.toMutableMap()
+    val subs = substrings.toSet().toList()
     val text = File(inputName).readText().uppercase()
-    for (i in substrings.indices) {
+    for (i in subs.indices) {
         for (j in text.indices) {
-            if (text.startsWith(substrings[i].uppercase(), j))
-                result[substrings[i]] = result[substrings[i]]!! + 1
+            if (text.startsWith(subs[i].uppercase(), j))
+                result[subs[i]] = result[subs[i]]!! + 1
         }
     }
     return result
@@ -157,7 +154,7 @@ fun sibilants(inputName: String, outputName: String) {
  */
 fun centerFile(inputName: String, outputName: String) {
     val input = File(inputName).readLines()
-    val theLongest = max(input).length
+    val theLongest = input.maxByOrNull { it.length }?.length ?: 0
     val output = File(outputName).bufferedWriter()
     for (str in input) {
         val line = str.trim()
@@ -201,7 +198,7 @@ fun centerFile(inputName: String, outputName: String) {
 fun alignFileByWidth(inputName: String, outputName: String) {
     val input = File(inputName).readLines()
     val output = File(outputName).bufferedWriter()
-    val mx = input.maxBy { it.replace("\\s{2,}".toRegex(), " ").length }.trim().length
+    val mx = input.maxByOrNull { it.replace("\\s{2,}".toRegex(), " ").length }?.trim()?.length ?: 0
     for (str in input) {
         val line = str.trim().replace("\\s{2,}".toRegex(), " ")
         val toWrite = StringBuilder()
@@ -309,7 +306,8 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
                 if (char.isUpperCase()) toWrite.append(dict[key]!!.replaceFirstChar { it.uppercaseChar() })
                 else toWrite.append(dict[key])
             } else {
-                toWrite.append(key)
+                if (char.isUpperCase()) toWrite.append(key.uppercaseChar())
+                else toWrite.append(key)
             }
         }
         output.write(toWrite.toString())
@@ -345,11 +343,14 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
 fun chooseLongestChaoticWord(inputName: String, outputName: String) {
     val output = File(outputName).bufferedWriter()
     var mxLength = -1
-    val results = mutableSetOf<String>()
+    var results = mutableSetOf<String>()
     for (word in File(inputName).readLines()) {
-        if (word.map { it.lowercaseChar() }.toSet().size == word.length && word.length >= mxLength) {
-            results.add(word)
+        val charSet = word.map { it.lowercaseChar() }.toSet()
+        if (charSet.size == word.length && word.length > mxLength) {
+            results = mutableSetOf(word)
             mxLength = word.length
+        } else if (charSet.size == word.length && word.length == mxLength) {
+            results.add(word)
         }
     }
     output.write(results.joinToString(separator = ", "))
