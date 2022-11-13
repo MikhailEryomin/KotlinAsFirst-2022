@@ -159,7 +159,7 @@ fun centerFile(inputName: String, outputName: String) {
     for (str in input) {
         val line = str.trim()
         val toWrite = StringBuilder()
-        val spacesCount = theLongest / 2 - line.length / 2
+        val spacesCount = (floor((theLongest / 2).toDouble()) - floor((line.length / 2).toDouble())).toInt()
         toWrite.append(" ".repeat(spacesCount))
         toWrite.append(line)
         output.write(toWrite.toString())
