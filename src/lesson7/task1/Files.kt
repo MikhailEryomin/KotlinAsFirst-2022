@@ -2,6 +2,7 @@
 
 package lesson7.task1
 
+import ru.spbstu.wheels.out
 import java.io.BufferedWriter
 import java.io.File
 import kotlin.math.abs
@@ -66,14 +67,14 @@ fun alignFile(inputName: String, lineLength: Int, outputName: String) {
  * Подчёркивание в середине и/или в конце строк значения не имеет.
  */
 fun deleteMarked(inputName: String, outputName: String) {
-    val output = File(outputName).bufferedWriter()
-    for (item in File(inputName).readLines()) {
-        if (!item.startsWith('_')) {
-            output.write(item)
-            output.newLine()
+    File(outputName).bufferedWriter().use { output ->
+        for (item in File(inputName).readLines()) {
+            if (!item.startsWith('_')) {
+                output.write(item)
+                output.newLine()
+            }
         }
     }
-    output.close()
 }
 
 /**
@@ -87,12 +88,12 @@ fun deleteMarked(inputName: String, outputName: String) {
  */
 fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
     val result = substrings.associateWith { 0 }.toMutableMap()
-    val subs = substrings.toSet().toList()
+    val subs = result.keys
     val text = File(inputName).readText().uppercase()
-    for (i in subs.indices) {
+    for (sub in subs) {
         for (j in text.indices) {
-            if (text.startsWith(subs[i].uppercase(), j))
-                result[subs[i]] = result[subs[i]]!! + 1
+            if (text.startsWith(sub.uppercase(), j))
+                result[sub] = result[sub]!! + 1
         }
     }
     return result
@@ -113,21 +114,17 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
  *
  */
 fun sibilants(inputName: String, outputName: String) {
-    val output = File(outputName).bufferedWriter()
     val compareMap = mapOf('Ы' to 'И', 'Я' to 'А', 'Ю' to 'У', 'ы' to 'и', 'я' to 'а', 'ю' to 'у')
-    val letters = setOf('Ж', 'Ч', 'Ш', 'Щ')
-    for (str in File(inputName).readLines()) {
-        val line = "$str*"
-        var i = 0
+    val letters = "жчшщЖЧШЩ"
+    val output = File(outputName).bufferedWriter()
+    File(inputName).forEachLine {
         val toWrite = StringBuilder()
-        while (i < line.length - 1) {
-            val sym = line[i]
-            val next = line[i + 1]
-            if (sym.uppercaseChar() in letters && next in compareMap.keys) {
-                toWrite.append(sym, compareMap[next])
-                i++
-            } else toWrite.append(sym)
-            i++
+        for (char in it) {
+            if (char in compareMap) {
+                if (toWrite.isNotEmpty() && toWrite.last() in letters) {
+                    toWrite.append(compareMap[char])
+                } else toWrite.append(char)
+            } else toWrite.append(char)
         }
         output.write(toWrite.toString())
         output.newLine()
@@ -154,7 +151,7 @@ fun sibilants(inputName: String, outputName: String) {
  */
 fun centerFile(inputName: String, outputName: String) {
     val input = File(inputName).readLines()
-    val theLongest = input.maxByOrNull { it.trim().length }?.trim()?.length ?: 0
+    val theLongest = input.maxOfOrNull { it.trim().length } ?: 0
     val output = File(outputName).bufferedWriter()
     for (str in input) {
         val line = str.trim()
@@ -195,9 +192,9 @@ fun centerFile(inputName: String, outputName: String) {
 fun alignFileByWidth(inputName: String, outputName: String) {
     val input = File(inputName).readLines()
     val output = File(outputName).bufferedWriter()
-    val mx = input.maxByOrNull { it.replace("\\s{2,}".toRegex(), " ").length }?.trim()?.length ?: 0
+    val mx = input.maxOfOrNull { it.replace("\\s{2,}".toRegex(), " ").trim().length } ?: 0
     for (str in input) {
-        val line = str.trim().replace("\\s{2,}".toRegex(), " ")
+        val line = str.trim()
         val toWrite = StringBuilder()
         val spaceCount = line.count { it == ' ' }
         val newSpacesCount = floor((mx - line.length) / spaceCount.toDouble()).toInt()
@@ -242,19 +239,14 @@ fun top20Words(inputName: String): Map<String, Int> {
     val top = mutableMapOf<String, Int>()
     for (line in File(inputName).readLines()) {
         //сплитуем строчку по любым не буквенным символам
-        val words = line.split("""[^a-zA-ZА-Яа-яёЁ]""".toRegex())
-            .filter { it.contains("""[a-zA-ZА-Яа-яёЁ]""".toRegex()) }
+        val words = line.split("""[^a-zA-ZА-Яа-яёЁ]""".toRegex()).filter { it.isNotEmpty() }
         for (element in words) {
             val word = element.lowercase()
-            if (word in top) {
-                top[word] = top[word]!! + 1
-            } else {
-                top[word] = 1
-            }
+            top[word] = top[word]?.plus(1) ?: 1
         }
     }
     val top20 = top.values.sortedDescending()
-    return if (top20.size >= 20) top.filter { it.value >= top20[19] } else top.filter { it.value >= 0 }
+    return top.filter { it.value >= top20[19] }
 }
 
 /**
@@ -303,7 +295,7 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
                 if (char.isUpperCase()) toWrite.append(dict[key]!!.replaceFirstChar { it.uppercaseChar() })
                 else toWrite.append(dict[key])
             } else {
-                if (char.isUpperCase()) toWrite.append(key.uppercaseChar())
+                if (char.isUpperCase()) toWrite.append(char)
                 else toWrite.append(key)
             }
         }
@@ -549,21 +541,21 @@ fun writeLine(content: String, output: BufferedWriter) {
 fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
     val output = File(outputName).bufferedWriter()
     val probResult = lhv * rhv
-    val max = maxOf(probResult.toString().length + 1, lhv.toString().length + 1, rhv.toString().length + 1)
-    writeLine("${" ".repeat(max - lhv.toString().length)}$lhv", output)
-    writeLine("*${" ".repeat(max - rhv.toString().length - 1)}$rhv", output)
+    val firstNumStr = lhv.toString()
+    val secondNumStr = rhv.toString()
+    val max = maxOf(probResult.toString().length + 1, firstNumStr.length + 1, secondNumStr.length + 1)
+    writeLine(firstNumStr.padStart(max), output)
+    writeLine("*" + secondNumStr.padStart(max - 1), output)
     writeLine("-".repeat(max), output)
     var k = 0
-    val number = rhv.toString()
-    for (i in number.length - 1 downTo 0) {
-        val num = number[i].digitToInt()
-        val subRes = (lhv * num).toString()
-        if (k == 0) writeLine("${" ".repeat(max - subRes.length)}$subRes", output)
-        else writeLine("+${" ".repeat(abs(max - subRes.length - k - 1))}$subRes", output)
+    for (i in secondNumStr.length - 1 downTo 0) {
+        val subRes = (lhv * secondNumStr[i].digitToInt()).toString()
+        if (k == 0) writeLine(subRes.padStart(max), output)
+        else writeLine("+" + subRes.padStart(max - k - 1), output)
         k++
     }
     writeLine("-".repeat(max), output)
-    writeLine("${" ".repeat(max - probResult.toString().length)}${probResult}", output)
+    writeLine(probResult.toString().padStart(max), output)
     output.close()
 }
 
