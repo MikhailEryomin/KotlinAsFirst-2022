@@ -592,31 +592,39 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     var rest = 0 // Здесь мы сохраняем цифры.
     var flag = false // флаг обработки делимого
     var prevSubRes = "" // здесь мы сохраняем предыдущий промежуточный рез-тат с нужными пробелами
-    writeLine(" $dividend | $rhv", output)
-    for (d in dividend) {
-        val num = d.digitToInt() + rest * 10
-        val whole = num / rhv
-        // Если мы уже обработали делимое, то к SubRes добавляем следующую цифру
-        if (flag) writeLine(d.toString(), output)
-        // 1) При обработке делимого num / rhv > 0; 2) Мы работаем с промеж. результатом; 3) Число изначально меньше делителя
-        if (whole > 0 || flag || lhv < rhv) {
-            val sub = "-${rhv * whole}"
-            val subResult = (num % rhv).toString()
-            rest = subResult.toInt()
-            // Если мы ещё не обработали делимое, выводим sub и результат деления
-            if (!flag) {
-                val result = (lhv / rhv).toString()
-                writeLine(sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1), output)
-                flag = true
+
+    if (lhv < rhv) {
+        writeLine("$dividend | $rhv", output)
+        writeLine("-0" + "0".padStart(dividend.length + 2), output)
+        writeLine("-".repeat(dividend.length), output)
+        writeLine(dividend, output)
+    } else {
+        writeLine(" $dividend | $rhv", output)
+        for (d in dividend) {
+            val num = d.digitToInt() + rest * 10
+            val whole = num / rhv
+            // Если мы уже обработали делимое, то к SubRes добавляем следующую цифру
+            if (flag) writeLine(d.toString(), output)
+            // 1) При обработке делимого num / rhv > 0; 2) Мы работаем с промеж. результатом
+            if (whole > 0 || flag) {
+                val sub = "-${rhv * whole}"
+                val subResult = (num % rhv).toString()
+                rest = subResult.toInt()
+                // Если мы ещё не обработали делимое, выводим sub и результат деления
+                if (!flag) {
+                    val result = (lhv / rhv).toString()
+                    writeLine(sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1), output)
+                    flag = true
+                } else {
+                    writeLine(sub.padStart(prevSubRes.length + 1), output)
+                }
+                val dashCount = maxOf(prevSubRes.trim().length + 1, sub.length)
+                writeLine("-".repeat(dashCount).padStart(prevSubRes.length + 1), output)
+                prevSubRes = subResult.padStart(sub.padStart(prevSubRes.length + 1).length)
+                output.write(prevSubRes)
             } else {
-                writeLine(sub.padStart(prevSubRes.length + 1), output)
+                rest = num
             }
-            val dashCount = maxOf(prevSubRes.trim().length + 1, sub.length)
-            writeLine("-".repeat(dashCount).padStart(prevSubRes.length + 1), output)
-            prevSubRes = subResult.padStart(sub.padStart(prevSubRes.length + 1).length)
-            output.write(prevSubRes)
-        } else {
-            rest = num
         }
     }
     output.close()
