@@ -594,10 +594,11 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     var prevSubRes = "" // здесь мы сохраняем предыдущий промежуточный рез-тат с нужными пробелами
 
     if (lhv < rhv) {
-        writeLine("$dividend | $rhv", output)
-        writeLine("-0" + "0".padStart(dividend.length + 2), output)
-        writeLine("-".repeat(dividend.length), output)
-        writeLine(dividend, output)
+        val div = dividend.padStart(2)
+        writeLine("$div | $rhv", output)
+        writeLine("-0" + "0".padStart(div.length + 2), output)
+        writeLine("-".repeat(maxOf(dividend.length, 2)), output)
+        writeLine(dividend.padStart(2), output)
     } else {
         writeLine(" $dividend | $rhv", output)
         for (d in dividend) {
