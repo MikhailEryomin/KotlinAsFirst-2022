@@ -255,7 +255,7 @@ fun top20Words(inputName: String): Map<String, Int> {
     return if (top20.size >= 20) top.filter { it.value >= top20[19] } else top
 }
 
-/**
+/***
  * Средняя (14 баллов)
  *
  * Реализовать транслитерацию текста из входного файла в выходной файл посредством динамически задаваемых правил.
