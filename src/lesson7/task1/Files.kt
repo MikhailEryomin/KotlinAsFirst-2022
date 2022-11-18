@@ -196,9 +196,9 @@ fun centerFile(inputName: String, outputName: String) {
  * 8) Если входной файл удовлетворяет требованиям 1-7, то он должен быть в точности идентичен выходному файлу
  */
 fun alignFileByWidth(inputName: String, outputName: String) {
-    val input = File(inputName).readLines()
+    val input = File(inputName).readLines().map { it.replace("\\s{2,}".toRegex(), " ") }
     val output = File(outputName).bufferedWriter()
-    val mx = input.maxOfOrNull { it.replace("\\s{2,}".toRegex(), " ").trim().length } ?: 0
+    val mx = input.maxOfOrNull { it.trim().length } ?: 0
     for (str in input) {
         val line = str.trim()
         val toWrite = StringBuilder()
@@ -252,7 +252,7 @@ fun top20Words(inputName: String): Map<String, Int> {
         }
     }
     val top20 = top.values.sortedDescending()
-    return top.filter { it.value >= top20[19] }
+    return if (top20.size >= 20) top.filter { it.value >= top20[19] } else top
 }
 
 /**
@@ -611,7 +611,8 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
             } else {
                 writeLine(sub.padStart(prevSubRes.length + 1), output)
             }
-            writeLine("-".repeat(sub.length).padStart(prevSubRes.length + 1), output)
+            val dashCount = maxOf(prevSubRes.trim().length + 1, sub.length)
+            writeLine("-".repeat(dashCount).padStart(prevSubRes.length + 1), output)
             prevSubRes = subResult.padStart(sub.padStart(prevSubRes.length + 1).length)
             output.write(prevSubRes)
         } else {
