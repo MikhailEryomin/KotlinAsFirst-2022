@@ -2,6 +2,7 @@
 
 package lesson7.task1
 
+import ru.spbstu.kotlin.typeclass.kind
 import ru.spbstu.wheels.out
 import java.io.BufferedWriter
 import java.io.File
@@ -89,11 +90,16 @@ fun deleteMarked(inputName: String, outputName: String) {
 fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
     val result = substrings.associateWith { 0 }.toMutableMap()
     val subs = result.keys
-    val text = File(inputName).readText().uppercase()
+    val text = File(inputName).readText()
     for (sub in subs) {
-        for (j in text.indices) {
-            if (text.startsWith(sub.uppercase(), j))
+        var i = 0
+        while (i < text.length) {
+            if (i + sub.length > text.length) break
+            if (text.substring(i, i + sub.length).equals(sub, ignoreCase = true)) {
                 result[sub] = result[sub]!! + 1
+            }
+            i = text.indexOf(sub[0], i + 1, ignoreCase = true)
+            if (i == -1) break
         }
     }
     return result
@@ -115,7 +121,7 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
  */
 fun sibilants(inputName: String, outputName: String) {
     val compareMap = mapOf('Ы' to 'И', 'Я' to 'А', 'Ю' to 'У', 'ы' to 'и', 'я' to 'а', 'ю' to 'у')
-    val letters = "жчшщЖЧШЩ"
+    val letters = "жчшщЖЧШЩ".toSet()
     val output = File(outputName).bufferedWriter()
     File(inputName).forEachLine {
         val toWrite = StringBuilder()
@@ -581,6 +587,37 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  *
  */
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
-    TODO()
+    val output = File(outputName).bufferedWriter()
+    val dividend = lhv.toString()
+    var rest = 0 // Здесь мы сохраняем цифры.
+    var flag = false // флаг обработки делимого
+    var prevSubRes = "" // здесь мы сохраняем предыдущий промежуточный рез-тат с нужными пробелами
+    writeLine(" $dividend | $rhv", output)
+    for (d in dividend) {
+        val num = d.digitToInt() + rest * 10
+        val whole = num / rhv
+        // Если мы уже обработали делимое, то к SubRes добавляем следующую цифру
+        if (flag) writeLine(d.toString(), output)
+        // 1) При обработке делимого num / rhv > 0; 2) Мы работаем с промеж. результатом; 3) Число изначально меньше делителя
+        if (whole > 0 || flag || lhv < rhv) {
+            val sub = "-${rhv * whole}"
+            val subResult = (num % rhv).toString()
+            rest = subResult.toInt()
+            // Если мы ещё не обработали делимое, выводим sub и результат деления
+            if (!flag) {
+                val result = (lhv / rhv).toString()
+                writeLine(sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1), output)
+                flag = true
+            } else {
+                writeLine(sub.padStart(prevSubRes.length + 1), output)
+            }
+            writeLine("-".repeat(sub.length).padStart(prevSubRes.length + 1), output)
+            prevSubRes = subResult.padStart(sub.padStart(prevSubRes.length + 1).length)
+            output.write(prevSubRes)
+        } else {
+            rest = num
+        }
+    }
+    output.close()
 }
 
