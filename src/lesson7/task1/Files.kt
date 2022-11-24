@@ -88,15 +88,14 @@ fun deleteMarked(inputName: String, outputName: String) {
  */
 fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
     val result = substrings.associateWith { 0 }.toMutableMap()
-    val subs = result.keys.map { it.uppercase() }
+    val subs = result.keys
     val text = File(inputName).readText()
     for (sub in subs) {
         var i = 0
         while (i < text.length) {
             if (i + sub.length > text.length) break
-            val subString = text.substring(i, i + sub.length)
-            if (result[subString.uppercase()] != null) {
-                result[subString.uppercase()] = result[subString]!! + 1
+            if (text.substring(i, i + sub.length).equals(sub, ignoreCase = true)) {
+                result[sub] = result[sub]!! + 1
             }
             i = text.indexOf(sub[0], i + 1, ignoreCase = true)
             if (i == -1) break
@@ -587,7 +586,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
         if (lhv < rhv) {
             val div = dividend.padStart(2)
             output.appendLine("$div | $rhv")
-            output.appendLine("-0" + "0".padStart(div.length + 2))
+            output.appendLine("-0".padStart(div.length) + "0".padStart(4))
             output.appendLine("-".repeat(maxOf(dividend.length, 2)))
             output.appendLine(dividend.padStart(2))
         } else {
