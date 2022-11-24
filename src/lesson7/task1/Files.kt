@@ -71,8 +71,7 @@ fun deleteMarked(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use { output ->
         for (item in File(inputName).readLines()) {
             if (!item.startsWith('_')) {
-                output.write(item)
-                output.newLine()
+                output.appendLine(item)
             }
         }
     }
@@ -89,14 +88,15 @@ fun deleteMarked(inputName: String, outputName: String) {
  */
 fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
     val result = substrings.associateWith { 0 }.toMutableMap()
-    val subs = result.keys
+    val subs = result.keys.map { it.uppercase() }
     val text = File(inputName).readText()
     for (sub in subs) {
         var i = 0
         while (i < text.length) {
             if (i + sub.length > text.length) break
-            if (text.substring(i, i + sub.length).equals(sub, ignoreCase = true)) {
-                result[sub] = result[sub]!! + 1
+            val subString = text.substring(i, i + sub.length)
+            if (result[subString.uppercase()] != null) {
+                result[subString.uppercase()] = result[subString]!! + 1
             }
             i = text.indexOf(sub[0], i + 1, ignoreCase = true)
             if (i == -1) break
@@ -122,20 +122,19 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
 fun sibilants(inputName: String, outputName: String) {
     val compareMap = mapOf('Ы' to 'И', 'Я' to 'А', 'Ю' to 'У', 'ы' to 'и', 'я' to 'а', 'ю' to 'у')
     val letters = "жчшщЖЧШЩ".toSet()
-    val output = File(outputName).bufferedWriter()
-    File(inputName).forEachLine {
-        val toWrite = StringBuilder()
-        for (char in it) {
-            if (char in compareMap) {
-                if (toWrite.isNotEmpty() && toWrite.last() in letters) {
-                    toWrite.append(compareMap[char])
+    File(outputName).bufferedWriter().use { output ->
+        File(inputName).forEachLine {
+            val toWrite = StringBuilder()
+            for (char in it) {
+                if (char in compareMap) {
+                    if (toWrite.isNotEmpty() && toWrite.last() in letters) {
+                        toWrite.append(compareMap[char])
+                    } else toWrite.append(char)
                 } else toWrite.append(char)
-            } else toWrite.append(char)
+            }
+            output.appendLine(toWrite.toString())
         }
-        output.write(toWrite.toString())
-        output.newLine()
     }
-    output.close()
 }
 
 /**
@@ -158,14 +157,13 @@ fun sibilants(inputName: String, outputName: String) {
 fun centerFile(inputName: String, outputName: String) {
     val input = File(inputName).readLines()
     val theLongest = input.maxOfOrNull { it.trim().length } ?: 0
-    val output = File(outputName).bufferedWriter()
-    for (str in input) {
-        val line = str.trim()
-        val spacesCount = floor((theLongest - line.length) / 2.0).toInt()
-        output.write(" ".repeat(spacesCount) + line)
-        output.newLine()
+    File(outputName).bufferedWriter().use { output ->
+        for (str in input) {
+            val line = str.trim()
+            val spacesCount = floor((theLongest - line.length) / 2.0).toInt()
+            output.appendLine(" ".repeat(spacesCount) + line)
+        }
     }
-    output.close()
 }
 
 /**
@@ -197,28 +195,27 @@ fun centerFile(inputName: String, outputName: String) {
  */
 fun alignFileByWidth(inputName: String, outputName: String) {
     val input = File(inputName).readLines().map { it.replace("\\s{2,}".toRegex(), " ") }
-    val output = File(outputName).bufferedWriter()
     val mx = input.maxOfOrNull { it.trim().length } ?: 0
-    for (str in input) {
-        val line = str.trim()
-        val toWrite = StringBuilder()
-        val spaceCount = line.count { it == ' ' }
-        val newSpacesCount = floor((mx - line.length) / spaceCount.toDouble()).toInt()
-        var spacesLeft = (mx - line.length) - newSpacesCount * spaceCount
-        for (char in line) {
-            if (char == ' ') {
-                toWrite.append(' ')
-                toWrite.append(" ".repeat(newSpacesCount))
-                if (spacesLeft > 0) {
+    File(outputName).bufferedWriter().use { output ->
+        for (str in input) {
+            val line = str.trim()
+            val toWrite = StringBuilder()
+            val spaceCount = line.count { it == ' ' }
+            val newSpacesCount = floor((mx - line.length) / spaceCount.toDouble()).toInt()
+            var spacesLeft = (mx - line.length) - newSpacesCount * spaceCount
+            for (char in line) {
+                if (char == ' ') {
                     toWrite.append(' ')
-                    spacesLeft--
-                }
-            } else toWrite.append(char)
+                    toWrite.append(" ".repeat(newSpacesCount))
+                    if (spacesLeft > 0) {
+                        toWrite.append(' ')
+                        spacesLeft--
+                    }
+                } else toWrite.append(char)
+            }
+            output.appendLine(toWrite.toString())
         }
-        output.write(toWrite.toString())
-        output.newLine()
     }
-    output.close()
 }
 
 /**
@@ -292,23 +289,22 @@ fun top20Words(inputName: String): Map<String, Int> {
  */
 fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: String) {
     val dict = dictionary.toMutableMap().mapKeys { it.key.lowercaseChar() }.mapValues { it.value.lowercase() }
-    val output = File(outputName).bufferedWriter()
-    for (line in File(inputName).readLines()) {
-        val toWrite = StringBuilder()
-        for (char in line) {
-            val key = char.lowercaseChar()
-            if (key in dict) {
-                if (char.isUpperCase()) toWrite.append(dict[key]!!.replaceFirstChar { it.uppercaseChar() })
-                else toWrite.append(dict[key])
-            } else {
-                if (char.isUpperCase()) toWrite.append(char)
-                else toWrite.append(key)
+    File(outputName).bufferedWriter().use { output ->
+        for (line in File(inputName).readLines()) {
+            val toWrite = StringBuilder()
+            for (char in line) {
+                val key = char.lowercaseChar()
+                if (key in dict) {
+                    if (char.isUpperCase()) toWrite.append(dict[key]!!.replaceFirstChar { it.uppercaseChar() })
+                    else toWrite.append(dict[key])
+                } else {
+                    if (char.isUpperCase()) toWrite.append(char)
+                    else toWrite.append(key)
+                }
             }
+            output.appendLine(toWrite.toString())
         }
-        output.write(toWrite.toString())
-        output.newLine()
     }
-    output.close()
 }
 
 /**
@@ -336,20 +332,20 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
  * Обратите внимание: данная функция не имеет возвращаемого значения
  */
 fun chooseLongestChaoticWord(inputName: String, outputName: String) {
-    val output = File(outputName).bufferedWriter()
     var mxLength = -1
     var results = mutableListOf<String>()
-    for (word in File(inputName).readLines()) {
-        val charSet = word.map { it.lowercaseChar() }.toSet()
-        if (charSet.size == word.length && word.length > mxLength) {
-            results = mutableListOf(word)
-            mxLength = word.length
-        } else if (charSet.size == word.length && word.length == mxLength) {
-            results.add(word)
+    File(outputName).bufferedWriter().use { output ->
+        for (word in File(inputName).readLines()) {
+            val charSet = word.map { it.lowercaseChar() }.toSet()
+            if (charSet.size == word.length && word.length > mxLength) {
+                results = mutableListOf(word)
+                mxLength = word.length
+            } else if (charSet.size == word.length && word.length == mxLength) {
+                results.add(word)
+            }
         }
+        output.write(results.joinToString(separator = ", "))
     }
-    output.write(results.joinToString(separator = ", "))
-    output.close()
 }
 
 /**
@@ -539,30 +535,26 @@ fun markdownToHtml(inputName: String, outputName: String) {
 2350
  *
  */
-fun writeLine(content: String, output: BufferedWriter) {
-    output.write(content)
-    output.newLine()
-}
 
 fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
-    val output = File(outputName).bufferedWriter()
     val probResult = lhv * rhv
     val firstNumStr = lhv.toString()
     val secondNumStr = rhv.toString()
     val max = maxOf(probResult.toString().length + 1, firstNumStr.length + 1, secondNumStr.length + 1)
-    writeLine(firstNumStr.padStart(max), output)
-    writeLine("*" + secondNumStr.padStart(max - 1), output)
-    writeLine("-".repeat(max), output)
-    var k = 0
-    for (i in secondNumStr.length - 1 downTo 0) {
-        val subRes = (lhv * secondNumStr[i].digitToInt()).toString()
-        if (k == 0) writeLine(subRes.padStart(max), output)
-        else writeLine("+" + subRes.padStart(max - k - 1), output)
-        k++
+    File(outputName).bufferedWriter().use { output ->
+        output.appendLine(firstNumStr.padStart(max))
+        output.appendLine("*" + secondNumStr.padStart(max - 1))
+        output.appendLine("-".repeat(max))
+        var k = 0
+        for (i in secondNumStr.length - 1 downTo 0) {
+            val subRes = (lhv * secondNumStr[i].digitToInt()).toString()
+            if (k == 0) output.appendLine(subRes.padStart(max))
+            else output.appendLine("+" + subRes.padStart(max - k - 1))
+            k++
+        }
+        output.appendLine("-".repeat(max))
+        output.appendLine(probResult.toString().padStart(max))
     }
-    writeLine("-".repeat(max), output)
-    writeLine(probResult.toString().padStart(max), output)
-    output.close()
 }
 
 
@@ -587,47 +579,45 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  *
  */
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
-    val output = File(outputName).bufferedWriter()
     val dividend = lhv.toString()
-    var rest = 0 // Здесь мы сохраняем цифры.
-    var flag = false // флаг обработки делимого
-    var prevSubRes = "" // здесь мы сохраняем предыдущий промежуточный рез-тат с нужными пробелами
-
-    if (lhv < rhv) {
-        val div = dividend.padStart(2)
-        writeLine("$div | $rhv", output)
-        writeLine("-0" + "0".padStart(div.length + 2), output)
-        writeLine("-".repeat(maxOf(dividend.length, 2)), output)
-        writeLine(dividend.padStart(2), output)
-    } else {
-        writeLine(" $dividend | $rhv", output)
-        for (d in dividend) {
-            val num = d.digitToInt() + rest * 10
-            val whole = num / rhv
-            // Если мы уже обработали делимое, то к SubRes добавляем следующую цифру
-            if (flag) writeLine(d.toString(), output)
-            // 1) При обработке делимого num / rhv > 0; 2) Мы работаем с промеж. результатом
-            if (whole > 0 || flag) {
-                val sub = "-${rhv * whole}"
-                val subResult = (num % rhv).toString()
-                rest = subResult.toInt()
-                // Если мы ещё не обработали делимое, выводим sub и результат деления
-                if (!flag) {
-                    val result = (lhv / rhv).toString()
-                    writeLine(sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1), output)
-                    flag = true
+    var rest = 0
+    var divIsProcessed = false
+    var prevSubRes = ""
+    File(outputName).bufferedWriter().use { output ->
+        if (lhv < rhv) {
+            val div = dividend.padStart(2)
+            output.appendLine("$div | $rhv")
+            output.appendLine("-0" + "0".padStart(div.length + 2))
+            output.appendLine("-".repeat(maxOf(dividend.length, 2)))
+            output.appendLine(dividend.padStart(2))
+        } else {
+            output.appendLine(" $dividend | $rhv")
+            for (d in dividend) {
+                val num = d.digitToInt() + rest * 10
+                val whole = num / rhv
+                if (divIsProcessed) output.appendLine(d.toString())
+                if (whole > 0 || divIsProcessed) {
+                    val sub = "-${rhv * whole}"
+                    val subResult = (num % rhv).toString()
+                    rest = subResult.toInt()
+                    if (!divIsProcessed) {
+                        val result = (lhv / rhv).toString()
+                        output.appendLine(
+                            sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1)
+                        )
+                        divIsProcessed = true
+                    } else {
+                        output.appendLine(sub.padStart(prevSubRes.length + 1))
+                    }
+                    val dashCount = maxOf(prevSubRes.trim().length + 1, sub.length)
+                    output.appendLine("-".repeat(dashCount).padStart(prevSubRes.length + 1))
+                    prevSubRes = subResult.padStart(sub.padStart(prevSubRes.length + 1).length)
+                    output.write(prevSubRes)
                 } else {
-                    writeLine(sub.padStart(prevSubRes.length + 1), output)
+                    rest = num
                 }
-                val dashCount = maxOf(prevSubRes.trim().length + 1, sub.length)
-                writeLine("-".repeat(dashCount).padStart(prevSubRes.length + 1), output)
-                prevSubRes = subResult.padStart(sub.padStart(prevSubRes.length + 1).length)
-                output.write(prevSubRes)
-            } else {
-                rest = num
             }
         }
     }
-    output.close()
 }
 
