@@ -333,16 +333,16 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
 fun chooseLongestChaoticWord(inputName: String, outputName: String) {
     var mxLength = -1
     var results = mutableListOf<String>()
-    File(outputName).bufferedWriter().use { output ->
-        for (word in File(inputName).readLines()) {
-            val charSet = word.map { it.lowercaseChar() }.toSet()
-            if (charSet.size == word.length && word.length > mxLength) {
-                results = mutableListOf(word)
-                mxLength = word.length
-            } else if (charSet.size == word.length && word.length == mxLength) {
-                results.add(word)
-            }
+    for (word in File(inputName).readLines()) {
+        val charSet = word.map { it.lowercaseChar() }.toSet()
+        if (charSet.size == word.length && word.length > mxLength) {
+            results = mutableListOf(word)
+            mxLength = word.length
+        } else if (charSet.size == word.length && word.length == mxLength) {
+            results.add(word)
         }
+    }
+    File(outputName).bufferedWriter().use { output ->
         output.write(results.joinToString(separator = ", "))
     }
 }
