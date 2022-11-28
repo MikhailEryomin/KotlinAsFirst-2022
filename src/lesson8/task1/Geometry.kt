@@ -3,10 +3,7 @@
 package lesson8.task1
 
 import lesson1.task1.sqr
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
+import kotlin.math.*
 
 // Урок 8: простые классы
 // Максимальное количество баллов = 40 (без очень трудных задач = 11)
@@ -82,14 +79,18 @@ data class Circle(val center: Point, val radius: Double) {
      * расстояние между их центрами минус сумма их радиусов.
      * Расстояние между пересекающимися окружностями считать равным 0.0.
      */
-    fun distance(other: Circle): Double = TODO()
+    fun distance(other: Circle): Double {
+        val sumOfRadius = radius + other.radius
+        val centerDistance = center.distance(other.center)
+        return if (sumOfRadius < centerDistance) centerDistance - sumOfRadius else 0.0
+    }
 
     /**
      * Тривиальная (1 балл)
      *
      * Вернуть true, если и только если окружность содержит данную точку НА себе или ВНУТРИ себя
      */
-    fun contains(p: Point): Boolean = TODO()
+    fun contains(p: Point): Boolean = p.distance(center) <= radius
 }
 
 /**
@@ -101,6 +102,8 @@ data class Segment(val begin: Point, val end: Point) {
 
     override fun hashCode() =
         begin.hashCode() + end.hashCode()
+
+    fun middlePoint() = Point((end.x + begin.x) / 2, (end.y + begin.y) / 2)
 }
 
 /**
@@ -109,7 +112,20 @@ data class Segment(val begin: Point, val end: Point) {
  * Дано множество точек. Вернуть отрезок, соединяющий две наиболее удалённые из них.
  * Если в множестве менее двух точек, бросить IllegalArgumentException
  */
-fun diameter(vararg points: Point): Segment = TODO()
+fun diameter(vararg points: Point): Segment {
+    if (points.size < 2) throw IllegalArgumentException("В наборе меньше двух точек")
+    var mxDistance = -1.0
+    var pair = Point(0.0, 0.0) to Point(0.0, 0.0)
+    for (i in points.indices) {
+        for (j in i + 1 until points.size) {
+            if (points[i].distance(points[j]) > mxDistance) {
+                pair = points[i] to points[j]
+                mxDistance = points[i].distance(points[j])
+            }
+        }
+    }
+    return Segment(pair.first, pair.second)
+}
 
 /**
  * Простая (2 балла)
@@ -117,7 +133,11 @@ fun diameter(vararg points: Point): Segment = TODO()
  * Построить окружность по её диаметру, заданному двумя точками
  * Центр её должен находиться посередине между точками, а радиус составлять половину расстояния между ними
  */
-fun circleByDiameter(diameter: Segment): Circle = TODO()
+fun circleByDiameter(diameter: Segment): Circle {
+    val diameterLength = diameter.begin.distance(diameter.end)
+    val center = Point((diameter.end.x + diameter.begin.x) / 2, (diameter.end.y + diameter.begin.y) / 2)
+    return Circle(center, diameterLength / 2)
+}
 
 /**
  * Прямая, заданная точкой point и углом наклона angle (в радианах) по отношению к оси X.
@@ -138,7 +158,11 @@ class Line private constructor(val b: Double, val angle: Double) {
      * Найти точку пересечения с другой линией.
      * Для этого необходимо составить и решить систему из двух уравнений (каждое для своей прямой)
      */
-    fun crossPoint(other: Line): Point = TODO()
+    fun crossPoint(other: Line): Point {
+        val x = (other.b * cos(this.angle) - this.b * cos(other.angle)) / sin(this.angle - other.angle)
+        val y = (other.b * sin(this.angle) - this.b * sin(other.angle)) / sin(this.angle - other.angle)
+        return Point(x, y)
+    }
 
     override fun equals(other: Any?) = other is Line && angle == other.angle && b == other.b
 
@@ -156,21 +180,32 @@ class Line private constructor(val b: Double, val angle: Double) {
  *
  * Построить прямую по отрезку
  */
-fun lineBySegment(s: Segment): Line = TODO()
+fun lineBySegment(s: Segment): Line {
+    val angle = atan((s.end.y - s.begin.y) / (s.end.x - s.begin.x))
+    return if (angle < 0) Line(s.begin, PI + angle) else Line(s.begin, angle)
+}
 
 /**
  * Средняя (3 балла)
  *
  * Построить прямую по двум точкам
  */
-fun lineByPoints(a: Point, b: Point): Line = TODO()
+fun lineByPoints(a: Point, b: Point): Line {
+    val angle = atan((b.y - a.y) / (b.x - a.x))
+    return if (angle < 0) Line(a, PI + angle) else Line(a, angle)
+}
 
 /**
  * Сложная (5 баллов)
  *
  * Построить серединный перпендикуляр по отрезку или по двум точкам
  */
-fun bisectorByPoints(a: Point, b: Point): Line = TODO()
+fun bisectorByPoints(a: Point, b: Point): Line {
+    val startPoint = Segment(a, b).middlePoint()
+    val normalSlope = -1 / ((b.y - a.y) / (b.x - a.x))
+    val normalAngle = if (normalSlope < 0) PI + atan(normalSlope) else atan(normalSlope)
+    return Line(startPoint, normalAngle)
+}
 
 /**
  * Средняя (3 балла)
@@ -184,7 +219,20 @@ fun bisectorByPoints(a: Point, b: Point): Line = TODO()
  *
  * Если в списке менее двух окружностей, бросить IllegalArgumentException
  */
-fun findNearestCirclePair(vararg circles: Circle): Pair<Circle, Circle> = TODO()
+fun findNearestCirclePair(vararg circles: Circle): Pair<Circle, Circle> {
+    if (circles.size < 2) throw IllegalArgumentException()
+    var minDistance = Double.MAX_VALUE
+    var pairOfCircles = Circle(Point(0.0, 0.0), 0.0) to Circle(Point(0.0, 0.0), 0.0)
+    for (i in circles.indices) {
+        for (j in i + 1 until circles.size) {
+            if (circles[i].distance(circles[j]) < minDistance) {
+                pairOfCircles = circles[i] to circles[j]
+                minDistance = circles[i].distance(circles[j])
+            }
+        }
+    }
+    return pairOfCircles
+}
 
 /**
  * Сложная (5 баллов)
@@ -195,7 +243,13 @@ fun findNearestCirclePair(vararg circles: Circle): Pair<Circle, Circle> = TODO()
  * (построить окружность по трём точкам, или
  * построить окружность, описанную вокруг треугольника - эквивалентная задача).
  */
-fun circleByThreePoints(a: Point, b: Point, c: Point): Circle = TODO()
+fun circleByThreePoints(a: Point, b: Point, c: Point): Circle {
+    val biSectorAB = bisectorByPoints(a, b)
+    val biSectorBC = bisectorByPoints(b, c)
+    val center = biSectorAB.crossPoint(biSectorBC)
+    val radius = center.distance(a)
+    return Circle(center, radius)
+}
 
 /**
  * Очень сложная (10 баллов)
