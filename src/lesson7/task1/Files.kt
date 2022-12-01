@@ -2,7 +2,6 @@
 
 package lesson7.task1
 
-import ru.spbstu.kotlin.typeclass.kind
 import ru.spbstu.wheels.out
 import java.io.BufferedWriter
 import java.io.File
@@ -94,11 +93,9 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
         var i = 0
         while (i < text.length) {
             if (i + sub.length > text.length) break
-            if (text.substring(i, i + sub.length).equals(sub, ignoreCase = true)) {
-                result[sub] = result[sub]!! + 1
-            }
-            i = text.indexOf(sub[0], i + 1, ignoreCase = true)
+            i = text.indexOf(sub, i + 1, ignoreCase = true)
             if (i == -1) break
+            result[sub] = result[sub]!! + 1
         }
     }
     return result
@@ -297,8 +294,7 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
                     if (char.isUpperCase()) toWrite.append(dict[key]!!.replaceFirstChar { it.uppercaseChar() })
                     else toWrite.append(dict[key])
                 } else {
-                    if (char.isUpperCase()) toWrite.append(char)
-                    else toWrite.append(key)
+                    toWrite.append(char)
                 }
             }
             output.appendLine(toWrite.toString())
