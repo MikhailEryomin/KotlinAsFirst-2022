@@ -113,7 +113,7 @@ data class Segment(val begin: Point, val end: Point) {
  * Если в множестве менее двух точек, бросить IllegalArgumentException
  */
 fun diameter(vararg points: Point): Segment {
-    if (points.size < 2) throw IllegalArgumentException("В наборе меньше двух точек")
+    if (points.toSet().size < 2) throw IllegalArgumentException("В наборе меньше двух различных точек")
     var mxDistance = -1.0
     var pair = Point(0.0, 0.0) to Point(0.0, 0.0)
     for (i in points.indices) {
@@ -181,9 +181,10 @@ class Line private constructor(val b: Double, val angle: Double) {
  * Построить прямую по отрезку
  */
 fun lineBySegment(s: Segment): Line {
-    var angle = atan((s.end.y - s.begin.y) / (s.end.x - s.begin.x))
-    if (abs(PI - angle) < 1e-6) angle = 0.0
-    return Line(s.begin, angle)
+    val slope = (s.end.y - s.begin.y) / (s.end.x - s.begin.x)
+    val angle = atan(slope)
+    if (abs(PI - angle) < 1e-6) return Line(s.begin, 0.0)
+    return if (slope < 0) Line(s.begin, angle + PI) else Line(s.begin, angle)
 }
 
 /**
@@ -192,9 +193,10 @@ fun lineBySegment(s: Segment): Line {
  * Построить прямую по двум точкам
  */
 fun lineByPoints(a: Point, b: Point): Line {
-    var angle = atan((b.y - a.y) / (b.x - a.x))
-    if (abs(PI - angle) < 1e-6) angle = 0.0
-    return Line(a, angle)
+    val slope = (b.y - a.y) / (b.x - a.x)
+    val angle = atan(slope)
+    if (abs(PI - angle) < 1e-6) return Line(a, 0.0)
+    return if (slope < 0) Line(a, angle + PI) else Line(a, angle)
 }
 
 /**
