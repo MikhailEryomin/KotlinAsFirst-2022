@@ -181,8 +181,9 @@ class Line private constructor(val b: Double, val angle: Double) {
  * Построить прямую по отрезку
  */
 fun lineBySegment(s: Segment): Line {
-    val angle = atan((s.end.y - s.begin.y) / (s.end.x - s.begin.x))
-    return if (angle < 0) Line(s.begin, PI + angle) else Line(s.begin, angle)
+    var angle = atan((s.end.y - s.begin.y) / (s.end.x - s.begin.x))
+    if (abs(PI - angle) < 1e-6) angle = 0.0
+    return Line(s.begin, angle)
 }
 
 /**
@@ -191,8 +192,9 @@ fun lineBySegment(s: Segment): Line {
  * Построить прямую по двум точкам
  */
 fun lineByPoints(a: Point, b: Point): Line {
-    val angle = atan((b.y - a.y) / (b.x - a.x))
-    return if (angle < 0) Line(a, PI + angle) else Line(a, angle)
+    var angle = atan((b.y - a.y) / (b.x - a.x))
+    if (abs(PI - angle) < 1e-6) angle = 0.0
+    return Line(a, angle)
 }
 
 /**
@@ -202,9 +204,11 @@ fun lineByPoints(a: Point, b: Point): Line {
  */
 fun bisectorByPoints(a: Point, b: Point): Line {
     val startPoint = Segment(a, b).middlePoint()
-    val normalSlope = -1 / ((b.y - a.y) / (b.x - a.x))
-    val normalAngle = if (normalSlope < 0) PI + atan(normalSlope) else atan(normalSlope)
-    return Line(startPoint, normalAngle)
+    val lineSlope = (b.y - a.y) / (b.x - a.x)
+    val normalSlope = -1 / lineSlope
+    val normalAngle = atan(normalSlope)
+    if (abs(normalAngle) < 1e-5) return Line(startPoint, 0.0)
+    return if (normalSlope < 0) Line(startPoint, normalAngle + PI) else Line(startPoint, normalAngle)
 }
 
 /**
