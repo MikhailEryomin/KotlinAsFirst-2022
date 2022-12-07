@@ -576,7 +576,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     var divIsProcessed = false
     var prevSubRes = ""
     File(outputName).bufferedWriter().use { output ->
-        if (lhv < rhv) {
+        if (lhv <= rhv) {
             val div = dividend.padStart(2)
             output.appendLine("$div | $rhv")
             output.appendLine("-0".padStart(div.length) + "0".padStart(4))
