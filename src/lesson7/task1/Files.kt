@@ -2,10 +2,7 @@
 
 package lesson7.task1
 
-import ru.spbstu.wheels.out
-import java.io.BufferedWriter
 import java.io.File
-import kotlin.math.abs
 import kotlin.math.floor
 
 // Урок 7: работа с файлами
@@ -586,25 +583,34 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
             output.appendLine("-".repeat(maxOf(dividend.length, 2)))
             output.appendLine(dividend.padStart(2))
         } else {
-            output.appendLine(" $dividend | $rhv")
             for (d in dividend) {
                 val num = d.digitToInt() + rest * 10
                 val whole = num / rhv
                 if (divIsProcessed) output.appendLine(d.toString())
                 if (whole > 0 || divIsProcessed) {
-                    val sub = "-${rhv * whole}"
+                    println(num)
+                    var sub: String
                     val subResult = (num % rhv).toString()
                     rest = subResult.toInt()
                     if (!divIsProcessed) {
+                        var toAppend: String
                         val result = (lhv / rhv).toString()
-                        output.appendLine(
-                            sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1)
-                        )
+                        if (num == lhv) {
+                            output.appendLine("$dividend | $rhv")
+                            sub = "-${rhv * whole}".padStart(num.toString().length)
+                            toAppend = result.padStart(dividend.length + 5 - sub.length + result.length - 2)
+                        } else {
+                            output.appendLine(" $dividend | $rhv")
+                            sub = "-${rhv * whole}".padStart(num.toString().length + 1)
+                            toAppend = result.padStart(dividend.length + 5 - sub.length + result.length - 1)
+                        }
+                        output.appendLine(sub + toAppend)
                         divIsProcessed = true
                     } else {
+                        sub = "-${rhv * whole}"
                         output.appendLine(sub.padStart(prevSubRes.length + 1))
                     }
-                    val dashCount = maxOf(prevSubRes.trim().length + 1, sub.length)
+                    val dashCount = maxOf(prevSubRes.trim().length, sub.length)
                     output.appendLine("-".repeat(dashCount).padStart(prevSubRes.length + 1))
                     prevSubRes = subResult.padStart(sub.padStart(prevSubRes.length + 1).length)
                     output.write(prevSubRes)
