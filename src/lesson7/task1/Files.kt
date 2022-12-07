@@ -583,6 +583,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
             output.appendLine("-".repeat(maxOf(dividend.length, 2)))
             output.appendLine(dividend.padStart(2))
         } else {
+            output.appendLine(" $dividend | $rhv")
             for (d in dividend) {
                 val num = d.digitToInt() + rest * 10
                 val whole = num / rhv
@@ -592,25 +593,17 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
                     val subResult = (num % rhv).toString()
                     rest = subResult.toInt()
                     if (!divIsProcessed) {
-                        var toAppend: String
+                        sub = "-${rhv * whole}".padStart(num.toString().length + 1)
                         val result = (lhv / rhv).toString()
-                        if (num == lhv) {
-                            val div = dividend.padStart(2)
-                            output.appendLine("$div | $rhv")
-                            sub = "-${rhv * whole}".padStart(num.toString().length)
-                            toAppend = result.padStart(div.length + 5 - sub.length + result.length - 2)
-                        } else {
-                            output.appendLine(" ${dividend.padStart(2)} | $rhv")
-                            sub = "-${rhv * whole}".padStart(num.toString().length + 1)
-                            toAppend = result.padStart(dividend.length + 5 - sub.length + result.length - 1)
-                        }
-                        output.appendLine(sub + toAppend)
+                        output.appendLine(
+                            sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1)
+                        )
                         divIsProcessed = true
                     } else {
                         sub = "-${rhv * whole}"
                         output.appendLine(sub.padStart(prevSubRes.length + 1))
                     }
-                    val dashCount = maxOf(prevSubRes.trim().length, sub.length)
+                    val dashCount = maxOf(prevSubRes.trim().length + 1, sub.length)
                     output.appendLine("-".repeat(dashCount).padStart(prevSubRes.length + 1))
                     prevSubRes = subResult.padStart(sub.padStart(prevSubRes.length + 1).length)
                     output.write(prevSubRes)
