@@ -576,7 +576,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     var divIsProcessed = false
     var prevSubRes = ""
     File(outputName).bufferedWriter().use { output ->
-        if (lhv <= rhv) {
+        if (lhv < rhv) {
             val div = dividend.padStart(2)
             output.appendLine("$div | $rhv")
             output.appendLine("-0".padStart(div.length) + "0".padStart(4))
@@ -588,7 +588,6 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
                 val whole = num / rhv
                 if (divIsProcessed) output.appendLine(d.toString())
                 if (whole > 0 || divIsProcessed) {
-                    println(num)
                     var sub: String
                     val subResult = (num % rhv).toString()
                     rest = subResult.toInt()
@@ -596,11 +595,12 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
                         var toAppend: String
                         val result = (lhv / rhv).toString()
                         if (num == lhv) {
-                            output.appendLine("$dividend | $rhv")
+                            val div = dividend.padStart(2)
+                            output.appendLine("$div | $rhv")
                             sub = "-${rhv * whole}".padStart(num.toString().length)
-                            toAppend = result.padStart(dividend.length + 5 - sub.length + result.length - 2)
+                            toAppend = result.padStart(div.length + 5 - sub.length + result.length - 2)
                         } else {
-                            output.appendLine(" $dividend | $rhv")
+                            output.appendLine(" ${dividend.padStart(2)} | $rhv")
                             sub = "-${rhv * whole}".padStart(num.toString().length + 1)
                             toAppend = result.padStart(dividend.length + 5 - sub.length + result.length - 1)
                         }
