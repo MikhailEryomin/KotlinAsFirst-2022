@@ -207,7 +207,6 @@ fun bisectorByPoints(a: Point, b: Point): Line {
     val lineSlope = (b.y - a.y) / (b.x - a.x)
     val normalSlope = -1 / lineSlope
     val normalAngle = atan(normalSlope)
-    if (abs(normalAngle) < 1e-5) return Line(startPoint, 0.0)
     //Здесь мы указываем конкретный угол, тк от него зависит направление прямой
     return if (normalSlope < 0) Line(startPoint, normalAngle + PI) else Line(startPoint, normalAngle)
 }
@@ -253,6 +252,7 @@ fun circleByThreePoints(a: Point, b: Point, c: Point): Circle {
     val biSectorBC = bisectorByPoints(b, c)
     val center = biSectorAB.crossPoint(biSectorBC)
     val radius = center.distance(a)
+    println("$center, $radius")
     return Circle(center, radius)
 }
 
