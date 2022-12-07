@@ -203,12 +203,10 @@ fun lineByPoints(a: Point, b: Point): Line {
  * Построить серединный перпендикуляр по отрезку или по двум точкам
  */
 fun bisectorByPoints(a: Point, b: Point): Line {
+    val lineAngle = lineByPoints(a, b).angle
     val startPoint = Segment(a, b).middlePoint()
-    val lineSlope = (b.y - a.y) / (b.x - a.x)
-    val normalSlope = -1 / lineSlope
-    val normalAngle = atan(normalSlope)
-    //Здесь мы указываем конкретный угол, тк от него зависит направление прямой
-    return if (normalSlope < 0) Line(startPoint, normalAngle + PI) else Line(startPoint, normalAngle)
+    return if (lineAngle < PI / 2) Line(startPoint, lineAngle + PI / 2)
+    else Line(startPoint, lineAngle - PI / 2)
 }
 
 /**
@@ -252,7 +250,6 @@ fun circleByThreePoints(a: Point, b: Point, c: Point): Circle {
     val biSectorBC = bisectorByPoints(b, c)
     val center = biSectorAB.crossPoint(biSectorBC)
     val radius = center.distance(a)
-    println("$center, $radius")
     return Circle(center, radius)
 }
 
