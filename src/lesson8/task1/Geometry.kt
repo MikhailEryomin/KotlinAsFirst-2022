@@ -182,9 +182,8 @@ class Line private constructor(val b: Double, val angle: Double) {
  */
 fun lineBySegment(s: Segment): Line {
     val slope = (s.end.y - s.begin.y) / (s.end.x - s.begin.x)
-    val angle = atan(slope)
-    if (abs(PI - angle) < 1e-6) return Line(s.begin, 0.0)
-    return if (slope < 0) Line(s.begin, angle + PI) else Line(s.begin, angle)
+    val angle = (atan(slope) + PI) % PI //Конструктор принимает только острые углы
+    return Line(s.begin, angle)
 }
 
 /**
@@ -194,9 +193,8 @@ fun lineBySegment(s: Segment): Line {
  */
 fun lineByPoints(a: Point, b: Point): Line {
     val slope = (b.y - a.y) / (b.x - a.x)
-    val angle = atan(slope)
-    if (abs(PI - angle) < 1e-6) return Line(a, 0.0)
-    return if (slope < 0) Line(a, angle + PI) else Line(a, angle)
+    val angle = (atan(slope) + PI) % PI //Конструктор принимает только острые углы
+    return Line(a, angle)
 }
 
 /**
@@ -210,6 +208,7 @@ fun bisectorByPoints(a: Point, b: Point): Line {
     val normalSlope = -1 / lineSlope
     val normalAngle = atan(normalSlope)
     if (abs(normalAngle) < 1e-5) return Line(startPoint, 0.0)
+    //Здесь мы указываем конкретный угол, тк от него зависит направление прямой
     return if (normalSlope < 0) Line(startPoint, normalAngle + PI) else Line(startPoint, normalAngle)
 }
 
