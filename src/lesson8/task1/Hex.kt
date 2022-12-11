@@ -2,6 +2,8 @@
 
 package lesson8.task1
 
+import kotlin.math.*
+
 /**
  * Точка (гекс) на шестиугольной сетке.
  * Координаты заданы как в примере (первая цифра - y, вторая цифра - x)
@@ -36,7 +38,8 @@ data class HexPoint(val x: Int, val y: Int) {
      * Расстояние вычисляется как число единичных отрезков в пути между двумя гексами.
      * Например, путь межу гексами 16 и 41 (см. выше) может проходить через 25, 34, 43 и 42 и имеет длину 5.
      */
-    fun distance(other: HexPoint): Int = TODO()
+    fun distance(other: HexPoint): Int =
+        maxOf(abs(this.y - other.y), abs(this.x - other.x), abs((this.x + this.y) - (other.x + other.y)))
 
     override fun toString(): String = "$y.$x"
 }
@@ -47,8 +50,30 @@ data class HexPoint(val x: Int, val y: Int) {
  * Например, шестиугольник с центром в 33 и радиусом 1 состоит из гексов 42, 43, 34, 24, 23, 32.
  */
 data class Hexagon(val center: HexPoint, val radius: Int) {
+//    fun getCorners(): Set<HexPoint> {
+//        val corners = mutableSetOf<HexPoint>()
+//        for (i in 0..5) {
+//            val pointAngle = PI / 3 * i
+//            corners.add(
+//                HexPoint(
+//                    (center.x + radius * cos(pointAngle)).toInt(),
+//                    (center.y + radius * sin(pointAngle)).toInt()
+//                )
+//            )
+//        }
+//        return corners
+//    }
 
     /**
+     *  *
+     *       60  61  62  63  64  65
+     *     50  51  52  53  54  55  56
+     *   40  41  42  43  44  45  46  47
+     * 30  31  32  33  34  35  36  37  38
+     *   21  22  23  24  25  26  27  28
+     *     12  13  14  15  16  17  18
+     *       03  04  05  06  07  08
+     *
      * Средняя (3 балла)
      *
      * Рассчитать расстояние между двумя шестиугольниками.
@@ -59,14 +84,20 @@ data class Hexagon(val center: HexPoint, val radius: Int) {
      * и другим шестиугольником B с центром в 26 и радиуоом 2 равно 2
      * (расстояние между точками 32 и 24)
      */
-    fun distance(other: Hexagon): Int = TODO()
+    fun distance(other: Hexagon): Int = //        if (this.center == other.center) return 0
+//        var minDistance = Int.MAX_VALUE
+//        this.getCorners().forEach { corn1 ->
+//            other.getCorners().forEach { corn2 -> minDistance = minOf(minDistance, corn1.distance(corn2)) }
+//        }
+//        return minDistance
+        max(0, this.center.distance(other.center) - this.radius - other.radius)
 
     /**
      * Тривиальная (1 балл)
      *
      * Вернуть true, если заданная точка находится внутри или на границе шестиугольника
      */
-    fun contains(point: HexPoint): Boolean = TODO()
+    fun contains(point: HexPoint): Boolean = point.distance(center) <= radius
 }
 
 /**
