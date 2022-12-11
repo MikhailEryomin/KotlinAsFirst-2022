@@ -255,7 +255,7 @@ fun mostExpensive(description: String): String {
     description.split("; ").forEach { item ->
         val data = item.split(" ")
         val price = data[1].toDouble()
-        if (price > result.second) result = Pair(data[0], price)
+        if (price >= result.second) result = Pair(data[0], price)
     }
     return result.first
 }
