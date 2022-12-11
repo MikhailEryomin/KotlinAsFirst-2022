@@ -251,7 +251,7 @@ fun firstDuplicateIndex(str: String): Int {
  */
 fun mostExpensive(description: String): String {
     var result = Pair("", 0.0)
-    if (!"""(\D+ \d+(\.\d+)?;?\s?)+""".toRegex().matches(description)) return ""
+    if (!"""(.+ \d+(\.\d+)?;?\s?)+""".toRegex().matches(description)) return ""
     description.split("; ").forEach { item ->
         val data = item.split(" ")
         val price = data[1].toDouble()
