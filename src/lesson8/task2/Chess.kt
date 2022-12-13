@@ -241,12 +241,33 @@ fun kingTrajectory(start: Square, end: Square): List<Square> {
  * Пример: knightMoveNumber(Square(3, 1), Square(6, 3)) = 3.
  * Конь может последовательно пройти через клетки (5, 2) и (4, 4) к клетке (6, 3).
  */
+
+fun findNeighbours(start: Square): List<Square> {
+    val variables = listOf<Pair<Int, Int>>(2 to -1, 1 to -2, -1 to -2, -2 to -1, 2 to 1)
+    val neighbours = mutableListOf<Square>()
+    for (dy in -2..2) {
+        for (dx in -2..2) {
+            if (abs(dy) + abs(dx) == 3) {
+                val square = Square(start.column + dx, start.row + dy)
+                if (square.inside()) neighbours.add(square)
+            }
+        }
+    }
+    return neighbours
+}
+
 fun knightMoveNumber(start: Square, end: Square): Int {
-//    if (!start.inside() || !end.inside()) throw IllegalArgumentException()
-//    if (start == end) return 0
-//    return max(abs(abs(start.row - end.row) - abs(start.column - end.column)),
-//        abs(start.row - end.row) + abs(start.column - end.column))
-    TODO()
+    if (!start.inside() || !end.inside()) throw IllegalArgumentException()
+    if (start == end) return 0
+    var steps = findNeighbours(start).toMutableList()
+    var stepCount = 1
+    while (end !in steps) {
+        val stepsTemp = mutableListOf<Square>()
+        steps.forEach { stepsTemp.addAll(findNeighbours(it)) }
+        steps = stepsTemp
+        stepCount++
+    }
+    return stepCount
 }
 
 /**
@@ -269,4 +290,21 @@ fun knightMoveNumber(start: Square, end: Square): Int {
  *
  * Если возможно несколько вариантов самой быстрой траектории, вернуть любой из них.
  */
-fun knightTrajectory(start: Square, end: Square): List<Square> = TODO()
+fun knightTrajectory(start: Square, end: Square): List<Square> {
+    val trajectory = mutableListOf<Square>()
+    var current = start
+    while (current != end) {
+        trajectory.add(current)
+        //Расстояние от текущей точки до конечной точки
+        val currentDistance = knightMoveNumber(current, end)
+        val neighbors = findNeighbours(current)
+        //Перебираем соседние клетки, если попалась близкая к концу, перескакаиваем на неё
+        for (neighbor in neighbors) {
+            if (knightMoveNumber(neighbor, end) < currentDistance) {
+                current = neighbor
+                break
+            }
+        }
+    }
+    return trajectory + end
+}
