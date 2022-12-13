@@ -576,6 +576,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     var divIsProcessed = false
     var prevSubRes = ""
     File(outputName).bufferedWriter().use { output ->
+        //Если делимое оказалось меньше делителя
         if (lhv < rhv) {
             val div = dividend.padStart(2)
             output.appendLine("$div | $rhv")
@@ -583,7 +584,6 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
             output.appendLine("-".repeat(maxOf(dividend.length, 2)))
             output.appendLine(dividend.padStart(2))
         } else {
-            output.appendLine(" $dividend | $rhv")
             for (d in dividend) {
                 val num = d.digitToInt() + rest * 10
                 val whole = num / rhv
@@ -593,11 +593,21 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
                     val subResult = (num % rhv).toString()
                     rest = subResult.toInt()
                     if (!divIsProcessed) {
-                        sub = "-${rhv * whole}".padStart(num.toString().length + 1)
+                        val numLength = num.toString().length
+                        sub = "-${rhv * whole}".padStart(numLength)
                         val result = (lhv / rhv).toString()
-                        output.appendLine(
-                            sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1)
-                        )
+                        //Решение вопроса с несчастным пробелом
+                        if (sub.length >= numLength) {
+                            output.appendLine(" $dividend | $rhv")
+                            output.appendLine(
+                                sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1)
+                            )
+                        } else {
+                            output.appendLine("$dividend | $rhv")
+                            output.appendLine(
+                                sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1)
+                            )
+                        }
                         divIsProcessed = true
                     } else {
                         sub = "-${rhv * whole}"

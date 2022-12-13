@@ -243,7 +243,6 @@ fun kingTrajectory(start: Square, end: Square): List<Square> {
  */
 
 fun findNeighbours(start: Square): List<Square> {
-    val variables = listOf<Pair<Int, Int>>(2 to -1, 1 to -2, -1 to -2, -2 to -1, 2 to 1)
     val neighbours = mutableListOf<Square>()
     for (dy in -2..2) {
         for (dx in -2..2) {
