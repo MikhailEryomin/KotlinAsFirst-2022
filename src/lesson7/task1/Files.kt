@@ -605,7 +605,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
                         } else {
                             output.appendLine("$dividend | $rhv")
                             output.appendLine(
-                                sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1)
+                                sub + result.padStart(dividend.length + 5 - sub.length + result.length - 2)
                             )
                         }
                         divIsProcessed = true
