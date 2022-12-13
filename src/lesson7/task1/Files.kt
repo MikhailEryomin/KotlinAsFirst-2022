@@ -597,7 +597,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
                         sub = "-${rhv * whole}".padStart(numLength)
                         val result = (lhv / rhv).toString()
                         //Решение вопроса с несчастным пробелом
-                        if (sub.length >= numLength) {
+                        if (sub.length > numLength) {
                             output.appendLine(" $dividend | $rhv")
                             output.appendLine(
                                 sub + result.padStart(dividend.length + 5 - sub.length + result.length - 1)
